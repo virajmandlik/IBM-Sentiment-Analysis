@@ -16,46 +16,46 @@ interface TestimonialProps {
 
 const testimonials: TestimonialProps[] = [
   {
-    image: "https://github.com/shadcn.png",
-    name: "John Doe React",
-    userName: "@john_Doe",
-    comment: "This landing page is awesome!",
+    image: "https://i.pravatar.cc/150?img=32",
+    name: "Sarah Williams",
+    userName: "@sarah_insights",
+    comment:
+      "Sentify transformed the way I manage my mental health. The AI's insights are accurate and actionable, helping me feel more in control of my emotions.",
   },
   {
-    image: "https://github.com/shadcn.png",
-    name: "John Doe React",
-    userName: "@john_Doe1",
+    image: "https://i.pravatar.cc/150?img=22",
+    name: "James Carter",
+    userName: "@james_carterAI",
     comment:
-      "Lorem ipsum dolor sit amet,empor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.",
-  },
-
-  {
-    image: "https://github.com/shadcn.png",
-    name: "John Doe React",
-    userName: "@john_Doe2",
-    comment:
-      "Lorem ipsum dolor sit amet,exercitation. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
+      "The ability to analyze my feelings through simple text input is incredible. Sentify is truly a game-changer for mental wellness enthusiasts.",
   },
   {
-    image: "https://github.com/shadcn.png",
-    name: "John Doe React",
-    userName: "@john_Doe3",
+    image: "https://i.pravatar.cc/150?img=46",
+    name: "Emily Johnson",
+    userName: "@emily_journey",
     comment:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+      "As a mental health counselor, Sentify's data-driven insights allow me to provide more personalized care to my clients. A must-have tool for professionals!",
   },
   {
-    image: "https://github.com/shadcn.png",
-    name: "John Doe React",
-    userName: "@john_Doe4",
+    image: "https://i.pravatar.cc/150?img=64",
+    name: "Mark Thompson",
+    userName: "@mark_researcher",
     comment:
-      "Lorem ipsum dolor sit amet, tempor incididunt  aliqua. Ut enim ad minim veniam, quis nostrud.",
+      "Sentify's AI sentiment analysis provides unparalleled accuracy. The ability to process social media interactions has been invaluable for my research.",
   },
   {
-    image: "https://github.com/shadcn.png",
-    name: "John Doe React",
-    userName: "@john_Doe5",
+    image: "https://i.pravatar.cc/150?img=18",
+    name: "Sophia Hernandez",
+    userName: "@sophia_hdz",
     comment:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "The early diagnostic capabilities of Sentify's AI have helped me recognize and address mental health concerns before they escalate. Highly recommended!",
+  },
+  {
+    image: "https://i.pravatar.cc/150?img=10",
+    name: "Michael Lee",
+    userName: "@michael_tech",
+    comment:
+      "The simplicity of Sentify combined with its advanced AI makes it accessible to everyone. It's like having a personal mental health assistant at your fingertips!",
   },
 ];
 
@@ -66,20 +66,19 @@ export const Testimonials = () => {
       className="container py-24 sm:py-32"
     >
       <h2 className="text-3xl md:text-4xl font-bold">
-        Discover Why
+        See How{" "}
         <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
-          {" "}
-          People Love{" "}
+          Sentify{" "}
         </span>
-        This Landing Page
+        Empowers Lives
       </h2>
 
       <p className="text-xl text-muted-foreground pt-4 pb-8">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Non unde error
-        facere hic reiciendis illo
+        Discover how Sentify is revolutionizing mental wellness with AI-driven
+        sentiment analysis. Here's what our users have to say:
       </p>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 sm:block columns-2  lg:columns-3 lg:gap-6 mx-auto space-y-4 lg:space-y-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 sm:block columns-2 lg:columns-3 lg:gap-6 mx-auto space-y-4 lg:space-y-6">
         {testimonials.map(
           ({ image, name, userName, comment }: TestimonialProps) => (
             <Card
@@ -89,10 +88,12 @@ export const Testimonials = () => {
               <CardHeader className="flex flex-row items-center gap-4 pb-2">
                 <Avatar>
                   <AvatarImage
-                    alt=""
+                    alt={`${name}'s avatar`}
                     src={image}
                   />
-                  <AvatarFallback>OM</AvatarFallback>
+                  <AvatarFallback>
+                    {name.split(" ").map((n) => n[0]).join("")}
+                  </AvatarFallback>
                 </Avatar>
 
                 <div className="flex flex-col">

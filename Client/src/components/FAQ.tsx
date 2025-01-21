@@ -13,33 +13,31 @@ interface FAQProps {
 
 const FAQList: FAQProps[] = [
   {
-    question: "Is this template free?",
-    answer: "Yes. It is a free ChadcnUI template.",
+    question: "Is this platform free to use?",
+    answer: "Yes, we provide free access to many of our core features with no cost involved.",
     value: "item-1",
   },
   {
-    question: "Lorem ipsum dolor sit amet consectetur adipisicing elit?",
+    question: "How do I start using the platform?",
     answer:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint labore quidem quam? Consectetur sapiente iste rerum reiciendis animi nihil nostrum sit quo, modi quod.",
+      "Simply sign up with your email, and you'll have access to our dashboard where you can explore features and tools to help you get started.",
     value: "item-2",
   },
   {
-    question:
-      "Lorem ipsum dolor sit amet  Consectetur natus dolores minus quibusdam?",
+    question: "Can I upgrade my account for more features?",
     answer:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Labore qui nostrum reiciendis veritatis necessitatibus maxime quis ipsa vitae cumque quo?",
+      "Yes, we offer premium plans that provide additional features, insights, and customization options. Visit our 'Pricing' page to learn more about the available plans.",
     value: "item-3",
   },
   {
-    question: "Lorem ipsum dolor sit amet, consectetur adipisicing elit?",
-    answer: "Lorem ipsum dolor sit amet consectetur, adipisicing elit.",
+    question: "What kind of support do you offer?",
+    answer: "We offer 24/7 email support, as well as a detailed knowledge base for self-help. For urgent issues, you can also chat with our support team directly.",
     value: "item-4",
   },
   {
-    question:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur natus?",
+    question: "Is my data secure with your platform?",
     answer:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint labore quidem quam? Consectetur sapiente iste rerum reiciendis animi nihil nostrum sit quo, modi quod.",
+      "Absolutely. We follow industry-standard encryption protocols to ensure your data is secure. Your privacy is our top priority, and we are GDPR compliant.",
     value: "item-5",
   },
 ];
@@ -80,7 +78,7 @@ export const FAQ = () => {
         Still have questions?{" "}
         <a
           rel="noreferrer noopener"
-          href="#"
+          href="#contact"
           className="text-primary transition-all border-primary hover:border-b-2"
         >
           Contact us

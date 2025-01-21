@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -18,6 +18,7 @@ import { Menu } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
 import { LogoIcon } from './Icons';
 import { Link } from 'react-router-dom';
+
 interface RouteProps {
   href: string;
   label: string;
@@ -37,8 +38,8 @@ const routeList: RouteProps[] = [
     label: 'Testimonials',
   },
   {
-    href: '#pricing',
-    label: 'Pricing',
+    href: '#contact',
+    label: 'Contact Us',
   },
   {
     href: '#faq',
@@ -48,25 +49,32 @@ const routeList: RouteProps[] = [
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  // Function to scroll to the top of the page
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   return (
     <header className="sticky border-b-[1px] top-0 z-40 w-full bg-white dark:border-b-slate-700 dark:bg-background">
       <NavigationMenu className="mx-auto">
         <NavigationMenuList className="container h-14 px-4 w-screen flex justify-between ">
           <NavigationMenuItem className="font-bold flex">
-            <a
-              rel="noreferrer noopener"
-              href="/"
-              className="ml-2 font-bold text-xl flex"
+            <button
+              onClick={scrollToTop}
+              className="ml-2 font-bold text-xl flex items-center"
             >
-              <LogoIcon/>
+              <LogoIcon />
               Sentify
-            </a>
+            </button>
           </NavigationMenuItem>
 
           {/* mobile */}
           <span className="flex md:hidden">
             <ModeToggle />
-
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger className="px-2">
                 <Menu
@@ -79,9 +87,7 @@ export const Navbar = () => {
 
               <SheetContent side={'left'}>
                 <SheetHeader>
-                  <SheetTitle className="font-bold text-xl">
-                    Shadcn/React
-                  </SheetTitle>
+                  <SheetTitle className="font-bold text-xl">Sentify</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col justify-center items-center gap-2 mt-4">
                   {routeList.map(({ href, label }: RouteProps) => (
@@ -129,14 +135,14 @@ export const Navbar = () => {
 
           <div className="hidden md:flex gap-2">
             <Link
-              to="/signup" // Change href to to
+              to="/signup"
               className={`border ${buttonVariants({ variant: 'secondary' })}`}
             >
               <GitHubLogoIcon className="mr-2 w-5 h-5" />
               Sign Up
             </Link>
             <Link
-              to="/signin" // Change href to to
+              to="/signin"
               className={`border ${buttonVariants({ variant: 'secondary' })}`}
             >
               <GitHubLogoIcon className="mr-2 w-5 h-5" />
@@ -147,5 +153,49 @@ export const Navbar = () => {
         </NavigationMenuList>
       </NavigationMenu>
     </header>
+  );
+};
+
+// ScrollToTop Component
+import { Button } from './ui/button';
+import { ArrowUpToLine } from 'lucide-react';
+
+export const ScrollToTop = () => {
+  const [showTopBtn, setShowTopBtn] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowTopBtn(true);
+      } else {
+        setShowTopBtn(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const goToTop = () => {
+    window.scroll({
+      top: 0,
+      left: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <>
+      {showTopBtn && (
+        <Button
+          onClick={goToTop}
+          className="fixed bottom-4 right-4 opacity-90 shadow-md"
+          size="icon"
+        >
+          <ArrowUpToLine className="h-4 w-4" />
+        </Button>
+      )}
+    </>
   );
 };

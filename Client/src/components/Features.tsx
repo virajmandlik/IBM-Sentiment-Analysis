@@ -20,19 +20,19 @@ const features: FeatureProps[] = [
   {
     title: "Responsive Design",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.",
+      "Our platform is designed to work seamlessly across all devices, ensuring your website looks great on desktops, tablets, and smartphones. Whether you're browsing on a large screen or a small mobile device, the experience is optimized for you.",
     image: image4,
   },
   {
-    title: "Intuitive user interface",
+    title: "Intuitive User Interface",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.",
+      "Navigating our platform is a breeze. We've crafted an intuitive interface that makes it easy for users of all experience levels to engage with the features. With well-organized menus, interactive elements, and a clean layout, you’ll find everything you need with just a few clicks.",
     image: image3,
   },
   {
-    title: "AI-Powered insights",
+    title: "AI-Powered Insights",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.",
+      "Harness the power of artificial intelligence to gain actionable insights. Our AI tools analyze your data to provide smart recommendations, trends, and forecasts, empowering you to make data-driven decisions that enhance productivity and growth.",
     image: image,
   },
 ];
@@ -41,11 +41,9 @@ const featureList: string[] = [
   "Dark/Light theme",
   "Reviews",
   "Features",
-  "Pricing",
   "Contact form",
   "Our team",
   "Responsive design",
-  "Newsletter",
   "Minimalist",
 ];
 

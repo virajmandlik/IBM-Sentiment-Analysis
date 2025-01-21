@@ -7,10 +7,10 @@ import { Footer } from './Footer';
 import { Hero } from './Hero';
 import { HowItWorks } from './HowItWorks';
 import { Navbar } from './Navbar';
-import { Newsletter } from './Newsletter';
-import { Pricing } from './Pricing';
+import { Contact } from './Contact';
+// import { Pricing } from './Pricing';
 import { ScrollToTop } from './ScrollToTop';
-import { Services } from './Services';
+// import { Services } from './Services';
 import { Users } from './Users';
 import { Team } from './Team';
 import { Testimonials } from './Testimonials';
@@ -24,14 +24,14 @@ const LandingPage: React.FC = () => {
       <About />
       <HowItWorks />
       <Features />
-      <Services />
-      <Cta />
+      {/* <Services />   */}
+      {/* <Cta /> */}
       <Testimonials />
       <Team />
-      <Pricing />
-      <Newsletter />
+      {/* <Pricing /> */}
+      <Contact />
       <FAQ />
-      <Footer />
+      {/* <Footer /> */}
       <ScrollToTop />
     </>
   );
