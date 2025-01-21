@@ -5,12 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import user from "../assets/User1.png";
-
 import ShineBorder from "@/components/ui/shine-border";
+
 export function OrbitingCirclesDemo() {
   return (
     <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
-      {/* BorderBeam effect */}
       {/* ShineBorder effect */}
       <ShineBorder
         className="relative flex items-center justify-center rounded-lg p-4"
@@ -20,14 +19,9 @@ export function OrbitingCirclesDemo() {
           Keep it Balanced
         </span>
       </ShineBorder>
-
- 
     </div>
   );
 }
-
-
-
 
 // Define the user data (Normal users and Mental Health Doctors)
 interface SponsorProps {
@@ -62,7 +56,7 @@ const AvatarDemo = ({ avatarUrl }: { avatarUrl: string }) => {
   );
 };
 
-// Analyze Component
+
 const AnalyzeComponent = ({
   user,
   onClose,
@@ -70,53 +64,92 @@ const AnalyzeComponent = ({
   user: SponsorProps;
   onClose: () => void;
 }) => {
+  const [feeling, setFeeling] = React.useState("");
+  const [challenge, setChallenge] = React.useState("");
+  const [improve, setImprove] = React.useState("");
+  
+  const [sentimentResults, setSentimentResults] = React.useState<any>(null);
+
+  const handleSubmit = () => {
+    const requestData = {
+      feeling, 
+      challenge, 
+      improve
+    };
+
+    console.log('Request Data:', requestData);
+
+    fetch("http://localhost:3000/api/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data); // Log the response to check if it's in the correct format
+        setSentimentResults(data); // Save the result to state
+      })
+      .catch((error) => {
+        console.error("Error during prediction:", error);
+      });
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <Card className="w-[400px] max-w-full bg-white dark:bg-gray-800 shadow-xl">
         <CardHeader>
           <CardTitle className="text-gray-900 dark:text-gray-100">
-            {user.isMentalDoctor ? "Upload CSV" : "Enter Sentiment"}
+            {user.isMentalDoctor ? "Upload CSV" : "Answer Questions"}
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
             {user.isMentalDoctor
               ? "Upload patient data in CSV format."
-              : "Please enter your sentiments and name."}
+              : "Help us understand your feelings better."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
             {user.isMentalDoctor ? (
               <div className="flex flex-col space-y-4">
-                <Label
-                  htmlFor="csv"
-                  className="text-gray-900 dark:text-gray-100"
-                >
+                <Label htmlFor="csv" className="text-gray-900 dark:text-gray-100">
                   Upload Patient CSV
                 </Label>
                 <Input id="csv" type="file" className="dark:bg-gray-700 dark:text-gray-100" />
               </div>
             ) : (
               <div className="flex flex-col space-y-4">
-                <Label
-                  htmlFor="sentiment"
-                  className="text-gray-900 dark:text-gray-100"
-                >
-                  Sentiment
+                <Label htmlFor="feeling" className="text-gray-900 dark:text-gray-100">
+                  How are you feeling today? Can you describe it briefly?
                 </Label>
                 <Input
-                  id="sentiment"
-                  placeholder="Enter your sentiments"
+                  id="feeling"
+                  value={feeling}
+                  onChange={(e) => setFeeling(e.target.value)}
+                  placeholder="I'm feeling..."
                   className="dark:bg-gray-700 dark:text-gray-100"
                 />
-                <Label
-                  htmlFor="name"
-                  className="text-gray-900 dark:text-gray-100"
-                >
-                  Your Name
+
+                <Label htmlFor="challenge" className="text-gray-900 dark:text-gray-100">
+                  What is the biggest concern or challenge on your mind right now?
                 </Label>
                 <Input
-                  id="name"
-                  placeholder="Enter your name"
+                  id="challenge"
+                  value={challenge}
+                  onChange={(e) => setChallenge(e.target.value)}
+                  placeholder="My biggest challenge is..."
+                  className="dark:bg-gray-700 dark:text-gray-100"
+                />
+
+                <Label htmlFor="improve" className="text-gray-900 dark:text-gray-100">
+                  What would make you feel better or improve your current situation?
+                </Label>
+                <Input
+                  id="improve"
+                  value={improve}
+                  onChange={(e) => setImprove(e.target.value)}
+                  placeholder="I would feel better if..."
                   className="dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
@@ -127,12 +160,23 @@ const AnalyzeComponent = ({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button>Submit</Button>
+          <Button onClick={handleSubmit}>Submit</Button>
         </CardFooter>
       </Card>
+
+      {sentimentResults && (
+        <div className="mt-4 p-4 bg-white shadow-xl rounded-lg w-full max-w-md mx-auto">
+          <h3 className="font-semibold text-lg">Sentiment Analysis Result</h3>
+          <p>Feeling Sentiment: {sentimentResults.individualSentiments?.feelingSentiment}</p>
+          <p>Challenge Sentiment: {sentimentResults.individualSentiments?.challengeSentiment}</p>
+          <p>Improve Sentiment: {sentimentResults.individualSentiments?.improveSentiment}</p>
+          <h4 className="mt-4">Overall Sentiment: {sentimentResults.overallSentiment}</h4>
+        </div>
+      )}
     </div>
   );
 };
+
 
 export const Users = () => {
   const [selectedUser, setSelectedUser] = React.useState<SponsorProps | null>(null);
