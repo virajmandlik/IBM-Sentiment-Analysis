@@ -164,6 +164,7 @@ const AnalyzeComponent = ({
         </CardFooter>
       </Card>
 
+      {/* Display Sentiment Results below the cards */}
       {sentimentResults && (
         <div className="mt-4 p-4 bg-white shadow-xl rounded-lg w-full max-w-md mx-auto">
           <h3 className="font-semibold text-lg">Sentiment Analysis Result</h3>
@@ -176,6 +177,7 @@ const AnalyzeComponent = ({
     </div>
   );
 };
+
 
 
 export const Users = () => {
@@ -234,9 +236,11 @@ export const Users = () => {
         ))}
       </div>
 
+      {/* Conditionally Render Sentiment Analysis Component Below Cards */}
       {selectedUser && (
         <AnalyzeComponent user={selectedUser} onClose={closeAnalyze} />
       )}
     </section>
   );
 };
+
