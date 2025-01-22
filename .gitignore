@@ -1,3 +1,10 @@
+# Node.js
+Server/node_modules/
+# Python
+Server/api/venv/
+*.pkl
+
+model.safetensors
 # Logs
 logs
 *.log

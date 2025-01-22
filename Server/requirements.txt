@@ -1,0 +1,7 @@
+flask
+flask-cors
+transformers
+torch
+scikit-learn
+
+npm install express ibm_db body-parser cors
