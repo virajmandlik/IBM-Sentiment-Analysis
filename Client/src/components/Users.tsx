@@ -169,7 +169,7 @@ const AnalyzeComponent = ({
               />
               <Label htmlFor="improve" className="text-gray-900 dark:text-gray-100">
                 What would improve your current situation?
-              </Label>
+              </Label>  
               <Input
                 id="improve"
                 value={improve}

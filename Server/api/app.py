@@ -33,16 +33,30 @@ def predict_sentiment(text):
 def predict():
     data = request.json
     feeling = data.get("feeling", "")
+    challenge = data.get("challenge", "")
+    improve = data.get("improve", "")
 
-    if not feeling:
-        return jsonify({"error": "Empty input"}), 400
+    if not feeling and not challenge and not improve:
+        return jsonify({"error": "Input fields cannot be empty"}), 400
 
-    try:
-        overall_sentiment = predict_sentiment(feeling)
-        return jsonify({"overallSentiment": overall_sentiment})
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({"error": "Prediction error"}), 500
+    # Analyze sentiments individually
+    individual_sentiments = {
+        "feelingSentiment": predict_sentiment(feeling) if feeling else None,
+        "challengeSentiment": predict_sentiment(challenge) if challenge else None,
+        "improveSentiment": predict_sentiment(improve) if improve else None,
+    }
+
+    # Overall sentiment (based on simple logic, modify as needed)
+    overall_sentiment = predict_sentiment(feeling + " " + challenge + " " + improve)
+
+    response_data = {
+        "individualSentiments": individual_sentiments,
+        "overallSentiment": overall_sentiment,
+    }
+
+    print("Flask response data:", response_data)  # Debug print
+    return jsonify(response_data)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -13,6 +13,7 @@ app.use(bodyParser.json());
 // Route for Wellness Enthusiasts
 app.post("/api/predict", async (req, res) => {
   const { feeling, challenge, improve } = req.body;
+  console.log("The data received at backend is:", feeling, challenge, improve);
 
   try {
     const response = await axios.post("http://localhost:5000/predict", {
@@ -20,12 +21,16 @@ app.post("/api/predict", async (req, res) => {
       challenge,
       improve,
     });
+    console.log("The data sending from backend is:", response.data);
+    
+    // Forward the entire response from Flask to the frontend
     res.json(response.data);
   } catch (error) {
     console.error("Error calling Flask API:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // Route for Counselors to process CSV data
 app.post("/api/predictPatientsSentiments", async (req, res) => {
@@ -43,23 +48,40 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
     const sentiment = row.Sentiment;
     const name = row.Name;
 
+    // Log the name and sentiment before sending to the model
+    console.log(`Processing name: ${name}, sentiment: ${sentiment}`);
+
     try {
+      // Send only the sentiment to the model
       const response = await axios.post("http://localhost:5000/predict", { feeling: sentiment });
-      results.push({
-        name: name,
-        sentiment: sentiment,
-        status: response.data.overallSentiment,
-      });
+
+      const result = {
+        name: name,                       // Name of the user
+        analyzedSentiment: response.data.overallSentiment, // Analyzed result from the model
+      };
+
+      // Push the result to the results array
+      results.push(result);
+
+      // Log the result being sent to the frontend
+      console.log("Result sent to frontend:", result);
     } catch (error) {
       console.error(`Error processing ${name}:`, error.message);
-      results.push({
+
+      // Handle errors and include an error status for this entry
+      const errorResult = {
         name: name,
-        sentiment: sentiment,
-        status: "Error processing sentiment",
-      });
+        analyzedSentiment: "Error processing sentiment",
+      };
+
+      results.push(errorResult);
+
+      // Log the error result being sent to the frontend
+      console.log("Error result sent to frontend:", errorResult);
     }
   }
 
+  // Send the results array to the frontend
   res.json(results);
 });
 
