@@ -6,27 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { MagicCard } from "@/components/ui/magic-card";
-import user from "../assets/User1.png";
-import ShineBorder from "@/components/ui/shine-border";
+import Papa from "papaparse"; // For parsing CSV
 import SentimentVisualization from "./SentimentVisualization";
 
-export function OrbitingCirclesDemo() {
-  return (
-    <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
-      {/* ShineBorder effect */}
-      <ShineBorder
-        className="relative flex items-center justify-center rounded-lg p-4"
-        color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
-      >
-        <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10">
-          Keep it Balanced
-        </span>
-      </ShineBorder>
-    </div>
-  );
-}
-
-// Define the user data (Normal users and Mental Health Doctors)
+// User Data (Wellness Enthusiasts and Counselors)
 interface SponsorProps {
   name: string;
   description: string;
@@ -49,14 +32,12 @@ const users: SponsorProps[] = [
   },
 ];
 
-const AvatarDemo = ({ avatarUrl }: { avatarUrl: string }) => {
-  return (
-    <Avatar>
-      <AvatarImage src={avatarUrl} alt="User Avatar" />
-      <AvatarFallback>MN</AvatarFallback>
-    </Avatar>
-  );
-};
+const AvatarDemo = ({ avatarUrl }: { avatarUrl: string }) => (
+  <Avatar className="mb-4">
+    <AvatarImage src={avatarUrl} alt="User Avatar" />
+    <AvatarFallback>MN</AvatarFallback>
+  </Avatar>
+);
 
 const AnalyzeComponent = ({
   user,
@@ -70,26 +51,79 @@ const AnalyzeComponent = ({
   const [feeling, setFeeling] = React.useState("");
   const [challenge, setChallenge] = React.useState("");
   const [improve, setImprove] = React.useState("");
+  const [csvFile, setCsvFile] = React.useState<File | null>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCsvFile(file);
+    }
+  };
 
   const handleSubmit = () => {
-    const requestData = { feeling, challenge, improve };
+    setLoading(true);
 
-    fetch("http://localhost:3000/api/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data); // Log response for debugging
-        onResults(data); // Pass data to parent component
-        onClose(); // Close the modal
-      })
-      .catch((error) => {
-        console.error("Error during prediction:", error);
+    if (user.isMentalDoctor && csvFile) {
+      // For Counselors: Parse and send CSV data
+      Papa.parse(csvFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          const csvData = result.data;
+
+          fetch("http://localhost:3000/api/predictPatientsSentiments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ csvData }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("Results:", data);
+              onResults(data);
+              setLoading(false);
+              onClose();
+            })
+            .catch((error) => {
+              console.error("Error sending CSV data:", error);
+              setLoading(false);
+            });
+        },
+        error: (err) => {
+          console.error("Error parsing CSV:", err);
+          setLoading(false);
+        },
       });
+    } else {
+      // For Wellness Enthusiasts: Send text data
+      const requestData = { feeling, challenge, improve };
+      fetch("http://localhost:3000/api/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Backend response:", data);
+          onResults(data);
+          setLoading(false);
+          onClose();
+        })
+        .catch((error) => {
+          console.error("Error during prediction:", error);
+          setLoading(false);
+        });
+    }
   };
 
   return (
@@ -97,53 +131,61 @@ const AnalyzeComponent = ({
       <div className="w-[400px] max-w-full bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
         <CardHeader>
           <CardTitle className="text-gray-900 dark:text-gray-100">
-            {user.isMentalDoctor ? "Upload CSV" : "Answer Questions"}
+            {user.isMentalDoctor ? "Upload CSV" : "Analyze Sentiments"}
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
             {user.isMentalDoctor
-              ? "Upload patient data in CSV format."
-              : "Help us understand your feelings better."}
+              ? "Upload a CSV file with patient data for sentiment analysis."
+              : "Fill out the form to analyze your sentiments."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4">
-            <Label htmlFor="feeling" className="text-gray-900 dark:text-gray-100">
-              How are you feeling today? Can you describe it briefly?
-            </Label>
-            <Input
-              id="feeling"
-              value={feeling}
-              onChange={(e) => setFeeling(e.target.value)}
-              placeholder="I'm feeling..."
-              className="dark:bg-gray-700 dark:text-gray-100"
-            />
-            <Label htmlFor="challenge" className="text-gray-900 dark:text-gray-100">
-              What is the biggest concern or challenge on your mind right now?
-            </Label>
-            <Input
-              id="challenge"
-              value={challenge}
-              onChange={(e) => setChallenge(e.target.value)}
-              placeholder="My biggest challenge is..."
-              className="dark:bg-gray-700 dark:text-gray-100"
-            />
-            <Label htmlFor="improve" className="text-gray-900 dark:text-gray-100">
-              What would make you feel better or improve your current situation?
-            </Label>
-            <Input
-              id="improve"
-              value={improve}
-              onChange={(e) => setImprove(e.target.value)}
-              placeholder="I would feel better if..."
-              className="dark:bg-gray-700 dark:text-gray-100"
-            />
-          </form>
+          {user.isMentalDoctor ? (
+            <div>
+              <Label htmlFor="csv-upload" className="text-gray-900 dark:text-gray-100">
+                Upload CSV
+              </Label>
+              <Input type="file" id="csv-upload" onChange={handleCSVUpload} accept=".csv" />
+            </div>
+          ) : (
+            <form className="space-y-4">
+              <Label htmlFor="feeling" className="text-gray-900 dark:text-gray-100">
+                How are you feeling today?
+              </Label>
+              <Input
+                id="feeling"
+                value={feeling}
+                onChange={(e) => setFeeling(e.target.value)}
+                placeholder="I'm feeling..."
+              />
+              <Label htmlFor="challenge" className="text-gray-900 dark:text-gray-100">
+                Biggest concern on your mind?
+              </Label>
+              <Input
+                id="challenge"
+                value={challenge}
+                onChange={(e) => setChallenge(e.target.value)}
+                placeholder="My biggest challenge is..."
+              />
+              <Label htmlFor="improve" className="text-gray-900 dark:text-gray-100">
+                What would improve your current situation?
+              </Label>
+              <Input
+                id="improve"
+                value={improve}
+                onChange={(e) => setImprove(e.target.value)}
+                placeholder="I would feel better if..."
+              />
+            </form>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Submit</Button>
+          <Button onClick={handleSubmit} disabled={user.isMentalDoctor && !csvFile}>
+            {loading ? "Processing..." : "Submit"}
+          </Button>
         </CardFooter>
       </div>
     </div>
@@ -167,27 +209,26 @@ export const Users = () => {
     <section id="users" className="container pt-24 sm:py-32">
       <h2 className="text-center text-md lg:text-xl font-bold mb-8 text-primary">Users</h2>
 
-      {/* Cards Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 place-items-center">
-
-
         {users.map((user) => (
           <MagicCard
             key={user.name}
             className="cursor-pointer flex flex-col items-center justify-center text-lg shadow-2xl p-6 rounded-lg"
             gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
           >
-            <CardHeader>
-              <CardTitle className="text-center">{user.name}</CardTitle>
-              <CardDescription className="text-center">{user.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center space-y-4">
-                <AvatarDemo avatarUrl={user.avatarUrl} />
-                <p className="text-center text-muted-foreground">{user.description}</p>
-              </div>
+            {/* Avatar (Icon) is moved to the top */}
+            <CardContent className="flex flex-col items-center">
+              <AvatarDemo avatarUrl={user.avatarUrl} />
             </CardContent>
-            <CardFooter className="flex justify-center">
+
+            <CardHeader className="text-center">
+              <CardTitle>{user.name}</CardTitle>
+            </CardHeader>
+
+            {/* Description below the Avatar */}
+            <CardDescription className="text-center">{user.description}</CardDescription>
+
+            <CardFooter className="flex justify-center mt-4">
               <Button variant="outline" onClick={() => handleAnalyze(user)}>
                 Analyze
               </Button>
@@ -196,16 +237,14 @@ export const Users = () => {
         ))}
       </div>
 
-      {/* Conditionally Render Analyze Component */}
       {selectedUser && (
         <AnalyzeComponent
           user={selectedUser}
           onClose={closeAnalyze}
-          onResults={(results) => setAnalysisResults(results)} // Pass results to state
+          onResults={(results) => setAnalysisResults(results)}
         />
       )}
 
-      {/* Visualization Section */}
       {analysisResults && (
         <div className="mt-8">
           <SentimentVisualization results={analysisResults} />

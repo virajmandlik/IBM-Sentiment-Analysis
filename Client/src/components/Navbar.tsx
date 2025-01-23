@@ -11,12 +11,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-
+import SentifyLogo from "../assets/Sentify-logo.png"; // Image import
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { buttonVariants } from './ui/button';
 import { Menu } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
-import { LogoIcon } from './Icons';
 import { Link } from 'react-router-dom';
 
 interface RouteProps {
@@ -67,8 +66,8 @@ export const Navbar = () => {
               onClick={scrollToTop}
               className="ml-2 font-bold text-xl flex items-center"
             >
-              <LogoIcon />
-              Sentify
+              <img src={SentifyLogo} alt="Sentify Logo" className="h-20 w-auto mr-2" />
+             
             </button>
           </NavigationMenuItem>
 
@@ -103,7 +102,7 @@ export const Navbar = () => {
                   ))}
                   <a
                     rel="noreferrer noopener"
-                    href="https://github.com/leoMirandaa/shadcn-landing-page.git"
+                    href="https://github.com/virajmandlik/IBM-Sentiment-Analysis"
                     target="_blank"
                     className={`w-[110px] border ${buttonVariants({
                       variant: 'secondary',
