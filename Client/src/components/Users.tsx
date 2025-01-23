@@ -6,25 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { MagicCard } from "@/components/ui/magic-card";
-import user from "../assets/User1.png";
-import ShineBorder from "@/components/ui/shine-border";
+import Papa from "papaparse"; // For CSV parsing
 import SentimentVisualization from "./SentimentVisualization";
-
-export function OrbitingCirclesDemo() {
-  return (
-    <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
-      {/* ShineBorder effect */}
-      <ShineBorder
-        className="relative flex items-center justify-center rounded-lg p-4"
-        color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
-      >
-        <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10">
-          Keep it Balanced
-        </span>
-      </ShineBorder>
-    </div>
-  );
-}
 
 // Define the user data (Normal users and Mental Health Doctors)
 interface SponsorProps {
@@ -70,27 +53,48 @@ const AnalyzeComponent = ({
   const [feeling, setFeeling] = React.useState("");
   const [challenge, setChallenge] = React.useState("");
   const [improve, setImprove] = React.useState("");
+  const [csvFile, setCsvFile] = React.useState<File | null>(null); // State for the uploaded CSV file
+  const [loading, setLoading] = React.useState(false); // Track loading state
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCsvFile(file);
+    }
+  };
 
   const handleSubmit = () => {
-    const requestData = { feeling, challenge, improve };
-
-    fetch("http://localhost:3000/api/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data); // Log response for debugging
-        onResults(data); // Pass data to parent component
-        onClose(); // Close the modal
-      })
-      .catch((error) => {
-        console.error("Error during prediction:", error);
+    setLoading(true); // Start loading
+    const requestData = { csvFile };
+  
+    // If CSV is provided, read and parse it using PapaParse
+    if (csvFile) {
+      Papa.parse(csvFile, {
+        complete: (result) => {
+          console.log("CSV Data Parsed:", result);
+          // Send the parsed data to the backend for analysis
+          fetch("http://localhost:3000/api/predictPatientsSentiments", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ csvData: result.data }), // Send parsed CSV data
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              onResults(data); // Pass data to parent component
+              onClose(); // Close the modal
+              setLoading(false); // Stop loading when data is received
+            })
+            .catch((error) => {
+              console.error("Error during prediction:", error);
+              setLoading(false); // Stop loading in case of error
+            });
+        },
       });
+    }
   };
+  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -106,38 +110,49 @@ const AnalyzeComponent = ({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4">
-            <Label htmlFor="feeling" className="text-gray-900 dark:text-gray-100">
-              How are you feeling today? Can you describe it briefly?
-            </Label>
-            <Input
-              id="feeling"
-              value={feeling}
-              onChange={(e) => setFeeling(e.target.value)}
-              placeholder="I'm feeling..."
-              className="dark:bg-gray-700 dark:text-gray-100"
-            />
-            <Label htmlFor="challenge" className="text-gray-900 dark:text-gray-100">
-              What is the biggest concern or challenge on your mind right now?
-            </Label>
-            <Input
-              id="challenge"
-              value={challenge}
-              onChange={(e) => setChallenge(e.target.value)}
-              placeholder="My biggest challenge is..."
-              className="dark:bg-gray-700 dark:text-gray-100"
-            />
-            <Label htmlFor="improve" className="text-gray-900 dark:text-gray-100">
-              What would make you feel better or improve your current situation?
-            </Label>
-            <Input
-              id="improve"
-              value={improve}
-              onChange={(e) => setImprove(e.target.value)}
-              placeholder="I would feel better if..."
-              className="dark:bg-gray-700 dark:text-gray-100"
-            />
-          </form>
+          {/* If counselor, show CSV upload field */}
+          {user.isMentalDoctor && (
+            <div>
+              <Label htmlFor="csv-upload" className="text-gray-900 dark:text-gray-100">
+                Upload Patient CSV
+              </Label>
+              <Input type="file" id="csv-upload" onChange={handleCSVUpload} />
+            </div>
+          )}
+          {!user.isMentalDoctor && (
+            <form className="space-y-4">
+              <Label htmlFor="feeling" className="text-gray-900 dark:text-gray-100">
+                How are you feeling today? Can you describe it briefly?
+              </Label>
+              <Input
+                id="feeling"
+                value={feeling}
+                onChange={(e) => setFeeling(e.target.value)}
+                placeholder="I'm feeling..."
+                className="dark:bg-gray-700 dark:text-gray-100"
+              />
+              <Label htmlFor="challenge" className="text-gray-900 dark:text-gray-100">
+                What is the biggest concern or challenge on your mind right now?
+              </Label>
+              <Input
+                id="challenge"
+                value={challenge}
+                onChange={(e) => setChallenge(e.target.value)}
+                placeholder="My biggest challenge is..."
+                className="dark:bg-gray-700 dark:text-gray-100"
+              />
+              <Label htmlFor="improve" className="text-gray-900 dark:text-gray-100">
+                What would make you feel better or improve your current situation?
+              </Label>
+              <Input
+                id="improve"
+                value={improve}
+                onChange={(e) => setImprove(e.target.value)}
+                placeholder="I would feel better if..."
+                className="dark:bg-gray-700 dark:text-gray-100"
+              />
+            </form>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={onClose}>
@@ -154,6 +169,7 @@ export const Users = () => {
   const { theme } = useTheme();
   const [selectedUser, setSelectedUser] = React.useState<SponsorProps | null>(null);
   const [analysisResults, setAnalysisResults] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(false); // Track loading state
 
   const handleAnalyze = (user: SponsorProps) => {
     setSelectedUser(user);
@@ -165,30 +181,19 @@ export const Users = () => {
 
   return (
     <section id="users" className="container pt-24 sm:py-32">
-      {/* Orbiting Circles Section */}
-      <div className="mt-5">
-        <OrbitingCirclesDemo />
-      </div>
-
-      {/* Image and Title */}
-      <img
-        src={user}
-        alt="Pilot representing mental health assistance"
-        className="w-[300px] object-contain rounded-lg"
-      />
-      <h2 className="text-center text-md lg:text-xl font-bold mb-8 text-primary">Users</h2>
+      <h2 className="text-center text-md lg:text-5xl font-bold mb-8 text-primary">Users</h2>
 
       {/* Cards Section */}
-      <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 place-items-center">
         {users.map((user) => (
           <MagicCard
             key={user.name}
-            className="cursor-pointer flex-col items-center justify-center whitespace-nowrap text-lg shadow-2xl w-[350px]"
+            className="cursor-pointer flex flex-col items-center justify-center text-lg shadow-2xl p-6 rounded-lg"
             gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
           >
             <CardHeader>
-              <CardTitle>{user.name}</CardTitle>
-              <CardDescription>{user.description}</CardDescription>
+              <CardTitle className="text-center">{user.name}</CardTitle>
+              <CardDescription className="text-center">{user.description}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center space-y-4">
@@ -196,7 +201,7 @@ export const Users = () => {
                 <p className="text-center text-muted-foreground">{user.description}</p>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="flex justify-center">
               <Button variant="outline" onClick={() => handleAnalyze(user)}>
                 Analyze
               </Button>
@@ -215,7 +220,7 @@ export const Users = () => {
       )}
 
       {/* Visualization Section */}
-      {analysisResults && (
+      {analysisResults && !loading && (
         <div className="mt-8">
           <SentimentVisualization results={analysisResults} />
         </div>
