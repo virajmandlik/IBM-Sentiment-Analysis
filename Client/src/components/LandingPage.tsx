@@ -8,6 +8,8 @@ import { Testimonials } from "./Testimonials";
 import { RetroGridBackground } from "./RetroGridBackground";
 import ScratchToRevealDemo from "./ScratchToRevealDemo";
 import {Users} from "./Users"
+import {HowItWorks} from "./HowItWorks"
+import {Contact} from "./Contact"
 const LandingPage: React.FC = () => {
   return (
     <>  
@@ -18,7 +20,9 @@ const LandingPage: React.FC = () => {
       <RetroGridBackground>
         <ScratchToRevealDemo />
       </RetroGridBackground>
+      <HowItWorks />
       <Testimonials />
+      <Contact/>
       <FAQ />
     </>
   );
