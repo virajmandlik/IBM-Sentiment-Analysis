@@ -96,6 +96,14 @@ module.exports = {
   				to: {
   					'background-position': '0% 0%'
   				}
+  			},
+  			grid: {
+  				'0%': {
+  					transform: 'translateY(-50%)'
+  				},
+  				'100%': {
+  					transform: 'translateY(0)'
+  				}
   			}
   		},
   		animation: {
@@ -103,7 +111,8 @@ module.exports = {
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			orbit: 'orbit calc(var(--duration)*1s) linear infinite',
   			'border-beam': 'border-beam calc(var(--duration)*1s) infinite linear',
-  			shine: 'shine var(--duration) infinite linear'
+  			shine: 'shine var(--duration) infinite linear',
+  			grid: 'grid 15s linear infinite'
   		}
   	}
   },
