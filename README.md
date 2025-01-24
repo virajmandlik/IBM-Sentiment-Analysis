@@ -10,3 +10,10 @@ Traditional diagnostic methods are often resource-intensive and leave many indiv
 - **Machine Learning Models**: Leveraging powerful machine learning algorithms, it identifies early signs of mental health disorders like anxiety and depression.
 - **Early Detection**: Provides an efficient method for early detection, helping with timely interventions and personalized care.
 - **Complementary to Traditional Methods**: This model enhances traditional diagnostic techniques by offering an additional layer of analysis and understanding.
+
+## Installation
+To run the project on your local machine, follow these steps:
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/virajmandlik/IBM-Sentiment-Analysis
