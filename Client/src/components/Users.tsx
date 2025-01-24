@@ -1,35 +1,15 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import user from "../assets/User1.png";
+import { useTheme } from "next-themes";
+import { MagicCard } from "@/components/ui/magic-card";
+import Papa from "papaparse"; // For parsing CSV
+import SentimentVisualization from "./SentimentVisualization";
 
-import ShineBorder from "@/components/ui/shine-border";
-export function OrbitingCirclesDemo() {
-  return (
-    <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
-      {/* BorderBeam effect */}
-      {/* ShineBorder effect */}
-      <ShineBorder
-        className="relative flex items-center justify-center rounded-lg p-4"
-        color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
-      >
-        <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10">
-          Keep it Balanced
-        </span>
-      </ShineBorder>
-
- 
-    </div>
-  );
-}
-
-
-
-
-// Define the user data (Normal users and Mental Health Doctors)
+// User Data (Wellness Enthusiasts and Counselors)
 interface SponsorProps {
   name: string;
   description: string;
@@ -41,8 +21,7 @@ const users: SponsorProps[] = [
   {
     name: "Wellness Enthusiasts",
     description: "An individual pursuing mental wellness evaluation.",
-    avatarUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQe2ViBkmacEAhE66woBFCerF6qqgtQGEB-AA&s",
+    avatarUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQe2ViBkmacEAhE66woBFCerF6qqgtQGEB-AA&s",
     isMentalDoctor: false,
   },
   {
@@ -53,89 +32,170 @@ const users: SponsorProps[] = [
   },
 ];
 
-const AvatarDemo = ({ avatarUrl }: { avatarUrl: string }) => {
-  return (
-    <Avatar>
-      <AvatarImage src={avatarUrl} alt="User Avatar" />
-      <AvatarFallback>MN</AvatarFallback>
-    </Avatar>
-  );
-};
+const AvatarDemo = ({ avatarUrl }: { avatarUrl: string }) => (
+  <Avatar className="mb-4">
+    <AvatarImage src={avatarUrl} alt="User Avatar" />
+    <AvatarFallback>MN</AvatarFallback>
+  </Avatar>
+);
 
-// Analyze Component
 const AnalyzeComponent = ({
   user,
   onClose,
+  onResults,
 }: {
   user: SponsorProps;
   onClose: () => void;
+  onResults: (results: any) => void;
 }) => {
+  const [feeling, setFeeling] = React.useState("");
+  const [challenge, setChallenge] = React.useState("");
+  const [improve, setImprove] = React.useState("");
+  const [csvFile, setCsvFile] = React.useState<File | null>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCsvFile(file);
+    }
+  };
+
+  const handleSubmit = () => {
+    setLoading(true);
+
+    if (user.isMentalDoctor && csvFile) {
+      // For Counselors: Parse and send CSV data
+      Papa.parse(csvFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          const csvData = result.data;
+
+          fetch("http://localhost:3000/api/predictPatientsSentiments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ csvData }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("Results:", data);
+              onResults(data);
+              setLoading(false);
+              onClose();
+            })
+            .catch((error) => {
+              console.error("Error sending CSV data:", error);
+              setLoading(false);
+            });
+        },
+        error: (err) => {
+          console.error("Error parsing CSV:", err);
+          setLoading(false);
+        },
+      });
+    } else {
+      // For Wellness Enthusiasts: Send text data
+      const requestData = { feeling, challenge, improve };
+      fetch("http://localhost:3000/api/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Backend response:", data);
+          onResults(data);
+          setLoading(false);
+          onClose();
+        })
+        .catch((error) => {
+          console.error("Error during prediction:", error);
+          setLoading(false);
+        });
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <Card className="w-[400px] max-w-full bg-white dark:bg-gray-800 shadow-xl">
+      <div className="w-[400px] max-w-full bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6">
         <CardHeader>
           <CardTitle className="text-gray-900 dark:text-gray-100">
-            {user.isMentalDoctor ? "Upload CSV" : "Enter Sentiment"}
+            {user.isMentalDoctor ? "Upload CSV" : "Analyze Sentiments"}
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
             {user.isMentalDoctor
-              ? "Upload patient data in CSV format."
-              : "Please enter your sentiments and name."}
+              ? "Upload a CSV file with patient data for sentiment analysis."
+              : "Fill out the form to analyze your sentiments."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
-            {user.isMentalDoctor ? (
-              <div className="flex flex-col space-y-4">
-                <Label
-                  htmlFor="csv"
-                  className="text-gray-900 dark:text-gray-100"
-                >
-                  Upload Patient CSV
-                </Label>
-                <Input id="csv" type="file" className="dark:bg-gray-700 dark:text-gray-100" />
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-4">
-                <Label
-                  htmlFor="sentiment"
-                  className="text-gray-900 dark:text-gray-100"
-                >
-                  Sentiment
-                </Label>
-                <Input
-                  id="sentiment"
-                  placeholder="Enter your sentiments"
-                  className="dark:bg-gray-700 dark:text-gray-100"
-                />
-                <Label
-                  htmlFor="name"
-                  className="text-gray-900 dark:text-gray-100"
-                >
-                  Your Name
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="Enter your name"
-                  className="dark:bg-gray-700 dark:text-gray-100"
-                />
-              </div>
-            )}
-          </form>
+          {user.isMentalDoctor ? (
+            <div>
+              <Label htmlFor="csv-upload" className="text-gray-900 dark:text-gray-100">
+                Upload CSV
+              </Label>
+              <Input type="file" id="csv-upload" onChange={handleCSVUpload} accept=".csv" />
+            </div>
+          ) : (
+            <form className="space-y-4">
+              <Label htmlFor="feeling" className="text-gray-900 dark:text-gray-100">
+                How are you feeling today?
+              </Label>
+              <Input
+                id="feeling"
+                value={feeling}
+                onChange={(e) => setFeeling(e.target.value)}
+                placeholder="I'm feeling..."
+              />
+              <Label htmlFor="challenge" className="text-gray-900 dark:text-gray-100">
+                Biggest concern on your mind?
+              </Label>
+              <Input
+                id="challenge"
+                value={challenge}
+                onChange={(e) => setChallenge(e.target.value)}
+                placeholder="My biggest challenge is..."
+              />
+              <Label htmlFor="improve" className="text-gray-900 dark:text-gray-100">
+                What would improve your current situation?
+              </Label>
+              <Input
+                id="improve"
+                value={improve}
+                onChange={(e) => setImprove(e.target.value)}
+                placeholder="I would feel better if..."
+              />
+            </form>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button>Submit</Button>
+          <Button onClick={handleSubmit} disabled={user.isMentalDoctor && !csvFile}>
+            {loading ? "Processing..." : "Submit"}
+          </Button>
         </CardFooter>
-      </Card>
+      </div>
     </div>
   );
 };
 
 export const Users = () => {
+  const { theme } = useTheme();
   const [selectedUser, setSelectedUser] = React.useState<SponsorProps | null>(null);
+  const [analysisResults, setAnalysisResults] = React.useState<any>(null);
 
   const handleAnalyze = (user: SponsorProps) => {
     setSelectedUser(user);
@@ -147,51 +207,48 @@ export const Users = () => {
 
   return (
     <section id="users" className="container pt-24 sm:py-32">
-      {/* Include OrbitingCirclesDemo here */}
-      <div className="mt-5">
-        <OrbitingCirclesDemo />
-      </div>
+      <h2 className="text-center text-md lg:text-xl font-bold mb-8 text-primary">Users</h2>
 
-      <img
-        src={user}
-        alt="Pilot representing mental health assistance"
-        className="w-[300px] object-contain rounded-lg"
-      />
-
-      <h2 className="text-center text-md lg:text-xl font-bold mb-8 text-primary">
-        Users
-      </h2>
-
-      <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 place-items-center">
         {users.map((user) => (
-          <div key={user.name} className="space-y-4">
-            <Card className="w-[350px] transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg hover:mb-4">
-              <CardHeader>
-                <CardTitle>{user.name}</CardTitle>
-                <CardDescription>{user.description}</CardDescription>
-              </CardHeader>
+          <MagicCard
+            key={user.name}
+            className="cursor-pointer flex flex-col items-center justify-center text-lg shadow-2xl p-6 rounded-lg"
+            gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
+          >
+            {/* Avatar (Icon) is moved to the top */}
+            <CardContent className="flex flex-col items-center">
+              <AvatarDemo avatarUrl={user.avatarUrl} />
+            </CardContent>
 
-              <CardContent>
-                <div className="flex flex-col items-center space-y-4">
-                  <AvatarDemo avatarUrl={user.avatarUrl} />
-                  <p className="text-center text-muted-foreground">
-                    {user.description}
-                  </p>
-                </div>
-              </CardContent>
+            <CardHeader className="text-center">
+              <CardTitle>{user.name}</CardTitle>
+            </CardHeader>
 
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" onClick={() => handleAnalyze(user)}>
-                  Analyze
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
+            {/* Description below the Avatar */}
+            <CardDescription className="text-center">{user.description}</CardDescription>
+
+            <CardFooter className="flex justify-center mt-4">
+              <Button variant="outline" onClick={() => handleAnalyze(user)}>
+                Analyze
+              </Button>
+            </CardFooter>
+          </MagicCard>
         ))}
       </div>
 
       {selectedUser && (
-        <AnalyzeComponent user={selectedUser} onClose={closeAnalyze} />
+        <AnalyzeComponent
+          user={selectedUser}
+          onClose={closeAnalyze}
+          onResults={(results) => setAnalysisResults(results)}
+        />
+      )}
+
+      {analysisResults && (
+        <div className="mt-8">
+          <SentimentVisualization results={analysisResults} />
+        </div>
       )}
     </section>
   );
