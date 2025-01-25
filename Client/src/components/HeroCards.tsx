@@ -65,7 +65,7 @@ export const HeroCards = () => {
             <div>
               <a
                 rel="noreferrer noopener"
-                href="https://github.com/leoMirandaa"
+                href="https://github.com/virajmandlik/IBM-Sentiment-Analysis"
                 target="_blank"
                 className={buttonVariants({
                   variant: "ghost",
@@ -77,7 +77,7 @@ export const HeroCards = () => {
               </a>
               <a
                 rel="noreferrer noopener"
-                href="https://twitter.com/leo_mirand4"
+                href="https://github.com/virajmandlik/IBM-Sentiment-Analysis"
                 target="_blank"
                 className={buttonVariants({
                   variant: "ghost",
@@ -100,7 +100,7 @@ export const HeroCards = () => {
         </Card>
 
         {/* Pricing */}
-        <Card className="absolute top-[150px] left-[50px] w-72 drop-shadow-xl shadow-black/10 dark:shadow-white/10">
+        <Card className="absolute top-[170px] left-[50px] w-72 drop-shadow-xl shadow-black/10 dark:shadow-white/10 ">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Free
@@ -136,7 +136,7 @@ export const HeroCards = () => {
         </Card>
 
         {/* Service */}
-        <Card className="absolute w-[350px] -right-[10px] bottom-[35px] drop-shadow-xl shadow-black/10 dark:shadow-white/10">
+        <Card className="absolute w-[350px] -right-[10px] bottom-[35px] top-[270px] drop-shadow-xl shadow-black/10 dark:shadow-white/10">
           <CardHeader className="space-y-1 flex md:flex-row justify-start items-start gap-4">
             <div className="mt-1 bg-primary/20 p-1 rounded-2xl">
               <LightBulbIcon />

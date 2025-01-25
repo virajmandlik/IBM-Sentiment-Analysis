@@ -211,7 +211,7 @@ const SentimentVisualization = ({ results }: { results: any }) => {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: any, name: string, props: any) => [
+                  formatter={(value: any, props: any) => [
                     `${props.payload.name}: ${valueToSentiment(value)}`,
                     "Sentiment",
                   ]}

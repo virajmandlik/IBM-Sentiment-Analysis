@@ -5,6 +5,7 @@ import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import './App.css';
 import UploadPost from "./components/UploadPost.tsx";
+
 function App() {
   return (
     <Router>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
-import { ShinyButtonDemo } from "./ShinyButtonDemo.tsx";
+import { ShinyButtonDemo } from "./ShinyButtonDemo";
 
 const ScratchToRevealDemo: React.FC = () => {
   const [isScratched, setIsScratched] = useState(false);
@@ -13,7 +13,7 @@ const ScratchToRevealDemo: React.FC = () => {
   return (
     <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-lg border bg-background p-6">
       {/* Text above the scratch card */}
-      <p className="text-xl font-semibold mb-4">Scratch to get amazed</p>
+      
 
       <ScratchToReveal
         width={250}

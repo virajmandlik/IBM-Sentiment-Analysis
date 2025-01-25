@@ -27,7 +27,7 @@ export const Hero = () => {
             </h1>
           </BoxReveal>
 
-          <BoxReveal boxColor={"#61DAFB"} duration={1} delay={0.2}>
+          <BoxReveal boxColor={"#61DAFB"} duration={1} >
             <h2 className="inline">
               for{" "}
               <span className="inline bg-gradient-to-r from-[#61DAFB] via-[#1fc0f1] to-[#03a3d7] text-transparent bg-clip-text">
@@ -38,7 +38,7 @@ export const Hero = () => {
         </main>
 
         {/* Description Section */}
-        <BoxReveal boxColor={"#F596D3"} duration={1} delay={0.3}>
+        <BoxReveal boxColor={"#F596D3"} duration={1}>
           <p className="text-xl text-muted-foreground md:w-10/12 mx-auto lg:mx-0">
             Leverage AI-driven sentiment analysis to identify mental health
             disorders with precision. By analyzing textual data and social
@@ -50,13 +50,13 @@ export const Hero = () => {
 
         {/* Button Section */}
         <div className="flex flex-wrap md:flex-nowrap gap-4 justify-center md:justify-start">
-          <BoxReveal boxColor={"#5046e6"} duration={1} delay={0.3}>
+          <BoxReveal boxColor={"#5046e6"} duration={1} >
             <Button className="w-full md:w-auto px-8" onClick={scrollToUsers}>
               Get Started
             </Button>
           </BoxReveal>
 
-          <BoxReveal boxColor={"#5046e6"} duration={1} delay={0.5}>
+          <BoxReveal boxColor={"#5046e6"} duration={1} >
             <a
               rel="noreferrer noopener"
               href="https://github.com/virajmandlik/IBM-Sentiment-Analysis"
@@ -81,7 +81,7 @@ export const Hero = () => {
 
       {/* Decorative Shadow Effect */}
       <div className="absolute inset-0 z-[-1]">
-        <BoxReveal boxColor={"#D247BF"} duration={1.5} delay={1}>
+        <BoxReveal boxColor={"#D247BF"} duration={1.5} >
           <div className="rounded-full blur-3xl bg-gradient-to-r from-[#45294e] via-[#5e2929] to-[#e41111] w-[200%] h-[200%] -translate-x-[50%] -translate-y-[50%]" />
         </BoxReveal>
       </div>
