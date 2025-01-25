@@ -18,13 +18,9 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "ibm_db": "^3.3.0",
-<<<<<<< Updated upstream
     "instagram-private-api": "^1.46.1",
-=======
     "ibm-watson": "^10.0.0",
-    "instagram-private-api": "^1.46.1",
     "multer": "^1.4.5-lts.1",
->>>>>>> Stashed changes
     "nodemon": "^3.1.9",
     "request-promise": "^4.2.6",
     "server": "file:"

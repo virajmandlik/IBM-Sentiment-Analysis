@@ -5,6 +5,8 @@ const cors = require("cors");
 const { loginToInstagram ,postToInstagram} = require("./instagram/index");
 const CronJob = require("cron").CronJob;
 const dotenv = require("dotenv");
+const multer = require("multer");
+const fs = require("fs");
 dotenv.config();
 
 const app = express();
@@ -65,46 +67,28 @@ console.log('the data recievd at bakend for posting is ',username, password, ima
 
 
 
+
+
 // Route for Wellness Enthusiasts
-// Route for Sentiment Analysis
 app.post("/api/predict", async (req, res) => {
-  const { feeling, challenge, improve, checkCaption } = req.body;
-  console.log("The data received at backend is:", feeling, challenge, improve, checkCaption);
+  const { feeling, challenge, improve } = req.body;
+  console.log("The data received at backend is:", feeling, challenge, improve);
 
-  // If checkCaption is provided, send it for sentiment analysis and ignore other fields
-  if (checkCaption) {
-    try {
-      console.log('The check caption is ', checkCaption);
-      const response = await axios.post("http://localhost:5000/predict", {
-        checkCaption: checkCaption,  // Send only checkCaption
-      });
+  try {
+    const response = await axios.post("http://localhost:5000/predict", {
+      feeling,
+      challenge,
+      improve,
+    });
+    console.log("The data sending from backend is:", response.data);
 
-      console.log("The data sending from backend is:", response.data);
-      res.json(response.data);  // Forward the response from Flask API
-    } catch (error) {
-      console.error("Error calling Flask API:", error.message);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  } else {
-    // Otherwise, process the feeling, challenge, and improve fields
-    try {
-      const response = await axios.post("http://localhost:5000/predict", {
-        feeling,
-        challenge,
-        improve,
-      });
-      console.log("The data sending from backend is:", response.data);
-      res.json(response.data);  // Forward the response from Flask API
-    } catch (error) {
-      console.error("Error calling Flask API:", error.message);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    // Forward the entire response from Flask to the frontend
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error calling Flask API:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-
-
 
 // Route for Counselors to process CSV data
 app.post("/api/predictPatientsSentiments", async (req, res) => {
@@ -127,10 +111,12 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
 
     try {
       // Send only the sentiment to the model
-      const response = await axios.post("http://localhost:5000/predict", { feeling: sentiment });
+      const response = await axios.post("http://localhost:5000/predict", {
+        feeling: sentiment,
+      });
 
       const result = {
-        name: name,                       // Name of the user
+        name: name, // Name of the user
         analyzedSentiment: response.data.overallSentiment, // Analyzed result from the model
       };
 
@@ -159,6 +145,56 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
   res.json(results);
 });
 
+// Set up multer for file uploads
+const upload = multer({ dest: "uploads/" });
+
+// Enable CORS
+app.use(cors({ origin: "http://localhost:5173" })); // Replace with your frontend origin
+
+// Environment variables for IBM Watson API
+const API_KEY = process.env.IBM_WATSON_API_KEY;
+const INSTANCE_URL = process.env.IBM_WATSON_URL;
+
+// API endpoint to handle audio file upload and transcription
+app.post("/transcribe", upload.single("audio"), async (req, res) => {
+  const audioFile = req.file;
+
+  if (!audioFile) {
+    return res.status(400).json({ error: "No audio file uploaded" });
+  }
+
+  try {
+    const audioData = fs.readFileSync(audioFile.path);
+
+    const contentType = audioFile.mimetype; // Dynamically set content type based on file
+
+    const response = await axios.post(
+      `${INSTANCE_URL}/v1/recognize`,
+      audioData,
+      {
+        headers: {
+          "Content-Type": contentType, // This should match the MIME type of the uploaded file
+        },
+        auth: {
+          username: "apikey",
+          password: API_KEY,
+        },
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(
+      "Error transcribing audio:",
+      error.response?.data || error.message
+    );
+    res.status(500).json({ error: "Failed to transcribe audio" });
+  } finally {
+    fs.unlink(audioFile.path, (err) => {
+      if (err) console.error("Error cleaning up file:", err);
+    });
+  }
+});
 app.listen(3000, () => {
   console.log("Node.js server is running on port 3000");
 });
