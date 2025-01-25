@@ -7,8 +7,8 @@ from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 app = Flask(__name__)
 
 # IBM Watson NLU initialization
-api_key = "1vc-gjCnhGz3PdeA8nZ0Vz5sp0Ap4ZCBwTxgNhXNiKpU"
-url = "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/697b168c-d918-43ee-bdba-b2ce21e121a2"
+api_key = "lxKgeqfXhJjt7Fx5a4MYWhanVaP0hk4ee5Yv3iXH0Bx8"
+url = "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/f9b86481-7fd2-469f-a114-1f382a787fc7"
 authenticator = IAMAuthenticator(api_key)
 nlu = NaturalLanguageUnderstandingV1(version="2021-08-01", authenticator=authenticator)
 nlu.set_service_url(url)
@@ -28,10 +28,10 @@ def analyze_sentiment():
     statement = data.get("statement", "")
     
     if not statement:
-        return jsonify({"error": "No statement provided"}), 400
+        return jsonify({"error": "No statement provide  d"}), 400
 
     sentiment = get_sentiment(statement)
     return jsonify({"sentiment": sentiment})
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=6000)  # Runs Flask API on localhost port 5000
+    app.run(debug=True, host="0.0.0.0", port=5000)  # Runs Flask API on localhost port 5000

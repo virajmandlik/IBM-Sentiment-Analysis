@@ -14,6 +14,7 @@ const Iphone15ProDemo: React.FC = () => {
   const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
 
   const [sentiment, setSentiment] = useState<string | null>(null);
+  const [emotionData, setEmotionData] = useState<any | null>(null); // Changed type to any for emotion data
   const [sentimentFeedback, setSentimentFeedback] = useState<string | null>(null);
 
   // Handle post upload
@@ -22,6 +23,17 @@ const Iphone15ProDemo: React.FC = () => {
 
     if (!imageUrl || !caption) {
       setUploadFeedback("Image URL and caption are required.");
+      return;
+    }
+
+    // Check if any emotion exceeds threshold
+    if (
+      (emotionData?.sadness && emotionData.sadness > 0.2) ||
+      (emotionData?.fear && emotionData.fear > 0.2) ||
+      (emotionData?.disgust && emotionData.disgust > 0.2) ||
+      (emotionData?.anger && emotionData.anger > 0.2)
+    ) {
+      setUploadFeedback("Please provide a more appropriate caption before posting.");
       return;
     }
 
@@ -58,7 +70,8 @@ const Iphone15ProDemo: React.FC = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setSentiment(data.overallSentiment);
+        setSentiment(data.sentiment);
+        setEmotionData(data.emotions); // Store emotion data in the state
         setSentimentFeedback("Sentiment analysis successful!");
       } else {
         setSentimentFeedback("Failed to analyze sentiment.");
@@ -66,6 +79,30 @@ const Iphone15ProDemo: React.FC = () => {
     } catch (error) {
       setSentimentFeedback("Something went wrong. Please try again.");
     }
+  };
+
+  const getSentimentColor = (sentiment: string | null) => {
+    switch (sentiment) {
+      case "positive":
+        return "text-green-500"; // Green for positive
+      case "negative":
+        return "text-red-500"; // Red for negative
+      case "neutral":
+        return "text-blue-500"; // Blue for neutral
+      default:
+        return "text-violet-500"; // Violet for others or unknown sentiment
+    }
+  };
+
+  const isPostButtonDisabled = () => {
+    // Button should be disabled if any emotion exceeds the threshold
+    const isEmotionValid =
+      (emotionData?.sadness && emotionData.sadness <= 0.2) &&
+      (emotionData?.fear && emotionData.fear <= 0.2) &&
+      (emotionData?.disgust && emotionData.disgust <= 0.2) &&
+      (emotionData?.anger && emotionData.anger <= 0.2);
+
+    return !isEmotionValid || !caption || !imageUrl;
   };
 
   return (
@@ -137,25 +174,24 @@ const Iphone15ProDemo: React.FC = () => {
         </Button>
         {sentimentFeedback && (
           <p
-            className={`text-sm ${
-              sentimentFeedback.includes("successful") ? "text-green-500" : "text-red-500"
-            }`}
+            className={`text-sm ${sentimentFeedback.includes("successful") ? "text-green-500" : "text-red-500"}`}
           >
-            {sentimentFeedback}
-            <div className="text-green-500" >Your Caption is having {sentiment} sentiment</div>
-            
+            <span className="text-violet-600">{sentimentFeedback}</span>
+            {sentiment && (
+              <div className={getSentimentColor(sentiment)}>
+                Your Caption is having {sentiment} sentiment
+              </div>
+            )}
           </p>
         )}
 
         {/* Post Button */}
-        <Button onClick={handlePost} className="w-full">
+        <Button onClick={handlePost} className="w-full" disabled={isPostButtonDisabled()}>
           Upload Post
         </Button>
         {uploadFeedback && (
           <p
-            className={`text-sm ${
-              uploadFeedback.includes("successfully") ? "text-green-500" : "text-red-500"
-            }`}
+            className={`text-sm ${uploadFeedback.includes("successfully") ? "text-green-500" : "text-red-500"}`}
           >
             {uploadFeedback}
           </p>
