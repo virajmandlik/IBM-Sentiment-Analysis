@@ -1,3 +1,3 @@
 FLASK_API_URL=http://localhost:5000
 IBM_WATSON_API_KEY=VomwuH4ZQJVmpwi4LuBR4_mQ383nE9AVjs0zoP_BxETI
-IBM_WATSON_URL=https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/fbee709f-27b2-4c05-906d-de179def0f6e
+IBM_WATSON_URL=https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/fbee709f-27b2-4c05-906d-de179def0f6e    
