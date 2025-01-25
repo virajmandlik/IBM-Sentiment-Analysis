@@ -142,7 +142,6 @@ app.post("/api/predict", async (req, res) => {
       const sentiment = sentimentResponse.data.sentiment;
       const emotions = emotionResponse.data.emotion.document.emotion;
 
-      
       // Combine the results into a single JSON object
       res.json({
         combinedStatement,
