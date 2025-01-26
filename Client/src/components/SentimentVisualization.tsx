@@ -25,25 +25,38 @@ import {
   NormalYoutubeLink,
   NormalThumbnail,
   BipolarYoutubeLink,
-  BipolarThumbnail,
-  PersonalityDisorderYoutubeLink,
-  PersonalityDisorderThumbnail,
+  BipolarThumbnail
 } from "./YoutubeConfig";
 
 // Define the interface for results
 interface SentimentVisualizationProps {
-  results: {
-    name: string;
-    sentiment: "positive" | "negative" | "neutral";
-    emotions: {
-      sadness: number;
-      joy: number;
-      fear: number;
-      disgust: number;
-      anger: number;
-    };
-  }[];
+  results:
+    | {
+        name: string;
+        sentiment: "positive" | "negative" | "neutral";
+        emotions: {
+          sadness: number;
+          joy: number;
+          fear: number;
+          disgust: number;
+          anger: number;
+        };
+        combinedStatement?: string; // Optional for individual analysis
+      }[]
+    | {
+        name: string;
+        sentiment: "positive" | "negative" | "neutral";
+        emotions: {
+          sadness: number;
+          joy: number;
+          fear: number;
+          disgust: number;
+          anger: number;
+        };
+        combinedStatement: string; // Required for individual analysis
+      };
 }
+
 
 // Sentiment emoji mappings
 const sentimentEmoji: Record<string, string> = {
@@ -128,40 +141,50 @@ const SentimentVisualization: React.FC<SentimentVisualizationProps> = ({ results
     );
   }
 
+  // Type Narrowing for individual analysis
+const individualResults = results as {
+  name: string;
+  sentiment: "positive" | "negative" | "neutral";
+  emotions: {
+    sadness: number;
+    joy: number;
+    fear: number;
+    disgust: number;
+    anger: number;
+  };
+  combinedStatement: string;
+};
+
   // For individual sentiment analysis, display results as usual using AreaChart
-  const dominantEmotion = Object.entries(results.emotions).reduce(
+  const dominantEmotion = Object.entries(individualResults.emotions).reduce(
     (prev, curr) => (curr[1] > prev[1] ? curr : prev),
     ["none", 0]
   )[0];
-
-  const videoRecommendation = emotionToYouTube(dominantEmotion) || sentimentToYouTube(results.sentiment);
-
+  
+  const videoRecommendation =
+    emotionToYouTube(dominantEmotion) || sentimentToYouTube(individualResults.sentiment);
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle>Sentiment Analysis Results</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Display Combined Statement */}
         <div className="mb-6">
           <h3 className="font-semibold text-lg">Combined Statement:</h3>
-          <p className="text-gray-700 dark:text-gray-300">{results.combinedStatement}</p>
+          <p className="text-gray-700 dark:text-gray-300">{individualResults.combinedStatement}</p>
         </div>
-
-        {/* Display Sentiment */}
         <div className="mb-6">
           <h3 className="font-semibold text-lg">Sentiment:</h3>
           <p className="text-2xl">
-            {sentimentEmoji[results.sentiment]} ({results.sentiment})
+            {sentimentEmoji[individualResults.sentiment]} ({individualResults.sentiment})
           </p>
         </div>
-
-        {/* Display Emotions as Area Chart */}
         <div className="mb-6">
           <h3 className="font-semibold text-lg mb-4">Emotions:</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart
-              data={Object.entries(results.emotions).map(([emotion, value]) => ({
+              data={Object.entries(individualResults.emotions).map(([emotion, value]) => ({
                 name: emotion,
                 value,
               }))}
@@ -174,8 +197,6 @@ const SentimentVisualization: React.FC<SentimentVisualizationProps> = ({ results
             </AreaChart>
           </ResponsiveContainer>
         </div>
-
-        {/* Video Recommendation */}
         {videoRecommendation && (
           <div className="mt-6">
             <h3 className="font-semibold text-lg">Recommended Video:</h3>
@@ -192,13 +213,15 @@ const SentimentVisualization: React.FC<SentimentVisualizationProps> = ({ results
               />
             </a>
             <p className="mt-2 text-sm text-muted-foreground">
-              Video recommendation based on {dominantEmotion} or overall sentiment ({results.sentiment}).
+              Video recommendation based on {dominantEmotion} or overall sentiment (
+              {individualResults.sentiment}).
             </p>
           </div>
         )}
       </CardContent>
     </Card>
   );
+  
 };
 
 export default SentimentVisualization;

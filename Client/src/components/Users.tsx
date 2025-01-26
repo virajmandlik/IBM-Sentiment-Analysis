@@ -57,8 +57,8 @@ const AnalyzeComponent = ({
   onResults: (results: any) => void;
 }) => {
   const [isRecording, setIsRecording] = React.useState<boolean>(false);
-  const [transcription, setTranscription] = React.useState<string | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
+  // const [transcription, setTranscription] = React.useState<string | null>(null);
+  const [ Error,setError] = React.useState<string | null>(null);
   const recorderRef = React.useRef<RecordRTC | null>(null);
 
   const handleToggleRecording = (

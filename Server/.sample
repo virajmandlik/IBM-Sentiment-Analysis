@@ -1,3 +1,12 @@
 FLASK_API_URL=http://localhost:5000
 IBM_WATSON_API_KEY=VomwuH4ZQJVmpwi4LuBR4_mQ383nE9AVjs0zoP_BxETI
-IBM_WATSON_URL=https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/fbee709f-27b2-4c05-906d-de179def0f6e    
+IBM_WATSON_URL=https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/fbee709f-27b2-4c05-906d-de179def0f6e
+
+
+// Define API key and URL for IBM Watson
+const APIKEY = "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-";
+const APIURL ="https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12";
+
+PYTHON *****
+IBM_API_KEY=pw5w-rzBYFsudrFWvmHxZH-RF7TH9tyXprSS1JBYYsgD
+IBM_URL=https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/1bd1372a-288f-4963-90e2-dea7d60beed6
