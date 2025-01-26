@@ -168,7 +168,7 @@ const AnalyzeComponent = ({
         complete: (result) => {
           const csvData = result.data;
 
-          fetch("/api/predictPatientsSentiments", {
+          fetch("https://ibm-sentiment-analysis.vercel.app/api/predictPatientsSentiments", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ csvData }),
@@ -199,7 +199,7 @@ const AnalyzeComponent = ({
     } else {
       // For Wellness Enthusiasts: Send text data
       const requestData = { feeling, challenge, improve };
-      fetch("/api/predict", {
+      fetch("https://ibm-sentiment-analysis.vercel.app/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
