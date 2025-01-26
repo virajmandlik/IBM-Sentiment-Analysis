@@ -57,8 +57,8 @@ const AnalyzeComponent = ({
   onResults: (results: any) => void;
 }) => {
   const [isRecording, setIsRecording] = React.useState<boolean>(false);
-  // const [transcription, setTranscription] = React.useState<string | null>(null);
-  const [ Error,setError] = React.useState<string | null>(null);
+  const [,setTranscription] = React.useState<string | null>(null);
+  // const [ Error,setError] = React.useState<string | null>(null);
   const recorderRef = React.useRef<RecordRTC | null>(null);
 
   const handleToggleRecording = (
@@ -81,16 +81,16 @@ const AnalyzeComponent = ({
           });
           recorderRef.current.startRecording();
           setIsRecording(true);
-          setError(null);
+          // setError(null);
         })
         .catch((err) => {
           // Handle the case where the user denies the permission
           if (err.name === "NotAllowedError") {
             console.error("Permission denied: Microphone access is required.");
-            setError("Permission denied: Microphone access is required.");
+            // setError("Permission denied: Microphone access is required.");
           } else {
             console.error("Error accessing microphone:", err);
-            setError("Error accessing microphone");
+            // setError("Error accessing microphone");
           }
         });
     } else {
@@ -105,20 +105,19 @@ const AnalyzeComponent = ({
           const formData = new FormData();
           formData.append("audio", file);
 
-          fetch("http://localhost:3000/transcribe", {
+          fetch("/transcribe", {
             method: "POST",
             body: formData,
           })
             .then((response) => {
               if (!response.ok) {
-                throw new Error("Failed to transcribe audio");
+                throw new globalThis.Error("Failed to transcribe audio");
               }
               return response.json();
             })
             .then((data) => {
-              const transcript =
-                data.results[0]?.alternatives[0]?.transcript ||
-                "No transcription available";
+              const transcript = data?.results?.[0]?.alternatives?.[0]?.transcript ?? "No transcription available";
+
               setTranscription(transcript); // Store the transcription in state
               console.log(transcript);
               // Update the respective input field based on the 'field' parameter
@@ -130,11 +129,11 @@ const AnalyzeComponent = ({
                 setImprove(transcript);
               }
 
-              setError(null);
+              // setError(null);
             })
             .catch((err) => {
               console.error("Error uploading file:", err);
-              setError("Failed to transcribe audio");
+              // setError("Failed to transcribe audio");
             });
         } else {
           console.error("No blob available for the recording");
@@ -168,14 +167,15 @@ const AnalyzeComponent = ({
         complete: (result) => {
           const csvData = result.data;
 
-          fetch("http://localhost:3000/api/predictPatientsSentiments", {
+          fetch("/api/predictPatientsSentiments", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ csvData }),
           })
             .then((response) => {
               if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new globalThis.Error(`HTTP error! status: ${response.status}`);
+
               }
               return response.json();
             })
@@ -198,14 +198,14 @@ const AnalyzeComponent = ({
     } else {
       // For Wellness Enthusiasts: Send text data
       const requestData = { feeling, challenge, improve };
-      fetch("http://localhost:3000/api/predict", {
+      fetch("/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new globalThis.Error(`HTTP error! status: ${response.status}`); // Updated
           }
           return response.json();
         })

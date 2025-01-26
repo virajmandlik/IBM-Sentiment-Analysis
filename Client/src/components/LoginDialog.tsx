@@ -12,7 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-export const LoginDialog: React.FC = () => {
+
+interface LoginDialogProps {
+  onClose: () => void;
+}
+
+export const LoginDialog: React.FC<LoginDialogProps> = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginFeedback, setLoginFeedback] = useState<string | null>(null);
@@ -24,7 +29,7 @@ export const LoginDialog: React.FC = () => {
     setLoginFeedback(null);
     try {
       console.log("Attempting login with:", { username, password });
-      const response = await fetch("http://localhost:3000/api/instagram/login", {
+      const response = await fetch("/api/instagram/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

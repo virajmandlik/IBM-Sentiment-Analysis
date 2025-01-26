@@ -6,7 +6,7 @@ const multer = require("multer");
 const fs = require("fs");
 const CronJob = require("cron").CronJob;
 const dotenv = require("dotenv");
-
+const path = require("path");
 // Load environment variables
 dotenv.config();
 
@@ -22,6 +22,14 @@ const INSTANCE_URL = process.env.IBM_URL;
 if (!API_KEY || !INSTANCE_URL) {
   throw new Error("IBM API key or URL is not set in the environment variables");
 }
+
+// Serve static files from the "dist" directory
+app.use(express.static(path.join(__dirname, "../dist")));
+
+// Fallback route to serve index.html for React SPA
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../dist", "index.html"));
+});
 
 // IBM Watson NLU initialization using Axios
 const analyzeSentiment = async (text) => {

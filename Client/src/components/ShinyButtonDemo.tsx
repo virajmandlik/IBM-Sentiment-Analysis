@@ -1,6 +1,6 @@
 import React from "react";
 import { ShinyButton } from "@/components/ui/shiny-button";
-import { LoginDialog } from "./LoginDialog.tsx";
+import { LoginDialog } from "./LoginDialog";
 
 export const ShinyButtonDemo: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
