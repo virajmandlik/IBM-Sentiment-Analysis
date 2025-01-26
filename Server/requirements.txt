@@ -1,5 +1,5 @@
-flask
-flask-cors
-transformers
-torch
-scikit-learn
+# flask
+# flask-cors
+# transformers
+# torch
+# scikit-learn
