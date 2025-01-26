@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  LabelList,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -87,52 +86,44 @@ const sentimentToYouTube = (sentiment: string) => {
 
 // The main visualization component
 const SentimentVisualization: React.FC<SentimentVisualizationProps> = ({ results }) => {
-  // Check if it's a CSV batch result
   const isBatchAnalysis = Array.isArray(results);
 
   // For batch analysis (CSV), display a stacked bar chart
   if (isBatchAnalysis) {
-    // Process CSV data and display in a Bar Chart format
+    const processedData = results.map((user) => ({
+      name: user.name,
+      sadness: user.emotions.sadness,
+      joy: user.emotions.joy,
+      fear: user.emotions.fear,
+      disgust: user.emotions.disgust,
+      anger: user.emotions.anger,
+      sentiment: user.sentiment,
+    }));
+
     return (
       <Card>
         <CardHeader>
           <CardTitle>Batch Sentiment Analysis (CSV)</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={results}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              {/* Display emotions as stacked bars */}
-              <Bar dataKey="sadness" stackId="a" fill="#8884d8" />
-              <Bar dataKey="joy" stackId="a" fill="#82ca9d" />
-              <Bar dataKey="fear" stackId="a" fill="#ff7300" />
-              <Bar dataKey="disgust" stackId="a" fill="#ff0000" />
-              <Bar dataKey="anger" stackId="a" fill="#d9d9d9" />
-              {/* Display sentiment as label on the top of the bars */}
-              <LabelList
-                dataKey="sentiment"
-                position="top"
-                content={(props) => {
-                  const { x, y, width, height, value } = props;
-                  return (
-                    <text
-                      x={x + width / 2}
-                      y={y + height + 10}
-                      textAnchor="middle"
-                      fill="#333"
-                      fontSize={12}
-                    >
-                      {sentimentEmoji[value]}
-                    </text>
-                  );
-                }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
+  <ResponsiveContainer width="100%" height={400}>
+    <BarChart data={processedData}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="name" />
+      <YAxis />
+    
+     
+      <Tooltip/> 
+      {/* Display emotions as stacked bars with no hover effect */}
+      <Bar dataKey="sadness" stackId="a" fill="#7774d8" stroke="#000" strokeWidth={1} barSize={50} fillOpacity={1} />
+      <Bar dataKey="joy" stackId="a" fill="#82ca9d" stroke="#000" strokeWidth={1} barSize={50} fillOpacity={1} />
+      <Bar dataKey="fear" stackId="a" fill="#ff7300" stroke="#000" strokeWidth={1} barSize={50} fillOpacity={1} />
+      <Bar dataKey="disgust" stackId="a" fill="#ff0000" stroke="#000" strokeWidth={1} barSize={50} fillOpacity={1} />
+      <Bar dataKey="anger" stackId="a" fill="#ff3000" stroke="#000" strokeWidth={1} barSize={50} fillOpacity={1} />
+    </BarChart>
+  </ResponsiveContainer>
+</CardContent>
+
       </Card>
     );
   }
@@ -143,7 +134,6 @@ const SentimentVisualization: React.FC<SentimentVisualizationProps> = ({ results
     ["none", 0]
   )[0];
 
-  // Get video recommendation based on the dominant emotion
   const videoRecommendation = emotionToYouTube(dominantEmotion) || sentimentToYouTube(results.sentiment);
 
   return (

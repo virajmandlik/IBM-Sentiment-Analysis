@@ -3,12 +3,23 @@ from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import Features, SentimentOptions
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
+
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get credentials from environment variables
+api_key = os.getenv("IBM_API_KEY")
+url = os.getenv("IBM_URL")
+
+if not api_key or not url:
+    raise ValueError("API key or URL is not set in the environment variables")
 # Initialize Flask app
 app = Flask(__name__)
 
 # IBM Watson NLU initialization
-api_key = "lxKgeqfXhJjt7Fx5a4MYWhanVaP0hk4ee5Yv3iXH0Bx8"
-url = "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/f9b86481-7fd2-469f-a114-1f382a787fc7"
 authenticator = IAMAuthenticator(api_key)
 nlu = NaturalLanguageUnderstandingV1(version="2021-08-01", authenticator=authenticator)
 nlu.set_service_url(url)

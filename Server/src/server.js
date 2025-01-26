@@ -12,6 +12,7 @@ const multer = require("multer");
 const API_KEY = process.env.IBM_WATSON_API_KEY;
 const INSTANCE_URL = process.env.IBM_WATSON_URL;
 
+
 dotenv.config();
 
 const app = express();
