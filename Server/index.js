@@ -16,19 +16,19 @@ app.use(bodyParser.json());
 app.use(cors({ origin: "http://localhost:5173" })); // Replace with your frontend origin
 
 // Environment variables for IBM Watson API
-const API_KEY = process.env.IBM_API_KEY;
-const INSTANCE_URL = process.env.IBM_URL;
+const API_KEY = process.env.IBM_WATSON_API_KEY;
+const INSTANCE_URL = process.env.IBM_WATSON_URL;
 
 if (!API_KEY || !INSTANCE_URL) {
   throw new Error("IBM API key or URL is not set in the environment variables");
 }
 
 // Serve static files from the "dist" directory
-app.use(express.static(path.join(__dirname, "../dist")));
+app.use(express.static(path.join(__dirname, "./dist")));
 
 // Fallback route to serve index.html for React SPA
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist", "index.html"));
+  res.sendFile(path.join(__dirname, "./dist", "index.html"));
 });
 
 // IBM Watson NLU initialization using Axios
