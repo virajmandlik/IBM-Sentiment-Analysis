@@ -78,7 +78,7 @@ const analyzeEmotions = async (text) => {
 };
 
 // Instagram functions (mock or real implementation)
-const { loginToInstagram, postToInstagram } = require("./instagram/index");
+const { loginToInstagram, postToInstagram } = require("./src/instagram/index.js");
 
 // Instagram login endpoint
 app.post("/api/instagram/login", async (req, res) => {
