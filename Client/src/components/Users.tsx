@@ -142,6 +142,7 @@ const AnalyzeComponent = ({
       setIsRecording(false);
     }
   };
+  
 
   const [feeling, setFeeling] = React.useState("");
   const [challenge, setChallenge] = React.useState("");
