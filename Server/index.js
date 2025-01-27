@@ -18,24 +18,33 @@ app.use(cors({ origin: "http://localhost:5173" })); // Replace with your fronten
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
 const INSTANCE_URL = process.env.IBM_WATSON_URL;
+// Semntiment 
+const SENTI_API_KEY = process.env.IBM_API_KEY;
+const SENTI_INSTANCE_URL = process.env.IBM_URL;
+
+// Emotion
+const EMOT_API_KEY = process.env.IBM_API_KEY;
+const EMOT_INSTANCE_URL = process.env.IBM_URL;
 
 if (!API_KEY || !INSTANCE_URL) {
   throw new Error("IBM API key or URL is not set in the environment variables");
 }
 
 // Serve static files from the "dist" directory
-app.use(express.static(path.join(__dirname, "./dist")));
+// app.use(express.static(path.join(__dirname, "./dist")));
 
 // Fallback route to serve index.html for React SPA
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "./dist", "index.html"));
-});
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "./dist", "index.html"));
+// });
+
+
 
 // IBM Watson NLU initialization using Axios
 const analyzeSentiment = async (text) => {
   try {
     const response = await axios.post(
-      `${INSTANCE_URL}/v1/analyze?version=2019-07-12`,
+      `${SENTI_INSTANCE_URL}/v1/analyze?version=2019-07-12`,
       {
         text,
         features: {
@@ -44,11 +53,13 @@ const analyzeSentiment = async (text) => {
       },
       {
         headers: { "Content-Type": "application/json" },
-        auth: { username: "apikey", password: API_KEY },
+        auth: { username: "apikey", password: SENTI_API_KEY },
       }
     );
+    console.log('the frontend anayze sentiment is ',response.data.sentiment.document.label)
     return response.data.sentiment.document.label;
   } catch (error) {
+    console.log('the error in senutment alaysis is ',error)
     console.error("Error in Watson Sentiment Analysis:", error.message);
     throw error;
   }
@@ -58,7 +69,7 @@ const analyzeSentiment = async (text) => {
 const analyzeEmotions = async (text) => {
   try {
     const response = await axios.post(
-      `${INSTANCE_URL}/v1/analyze?version=2019-07-12`,
+      `${EMOT_INSTANCE_URL}/v1/analyze?version=2019-07-12`,
       {
         text,
         features: {
@@ -67,9 +78,10 @@ const analyzeEmotions = async (text) => {
       },
       {
         headers: { "Content-Type": "application/json" },
-        auth: { username: "apikey", password: API_KEY },
+        auth: { username: "apikey", password: EMOT_API_KEY },
       }
     );
+    console.log('the message is in emotions i s',response.data.emotion.document.emotion)
     return response.data.emotion.document.emotion;
   } catch (error) {
     console.error("Error in Watson Emotion Analysis:", error.message);
@@ -83,7 +95,7 @@ const { loginToInstagram, postToInstagram } = require("./src/instagram/index.js"
 // Instagram login endpoint
 app.post("/api/instagram/login", async (req, res) => {
   const { username, password } = req.body;
-
+  // console.log("the usernamse an dpasss i s",username,password)
   if (!username || !password) {
     return res.status(400).json({ error: "Username and password are required." });
   }

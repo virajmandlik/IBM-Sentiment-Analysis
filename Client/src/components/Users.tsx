@@ -105,7 +105,7 @@ const AnalyzeComponent = ({
           const formData = new FormData();
           formData.append("audio", file);
 
-          fetch("/transcribe", {
+          fetch("http://localhost:3000/transcribe", {
             method: "POST",
             body: formData,
           })
@@ -168,7 +168,7 @@ const AnalyzeComponent = ({
         complete: (result) => {
           const csvData = result.data;
 
-          fetch("/api/predictPatientsSentiments", {
+          fetch("http://localhost:3000/api/predictPatientsSentiments", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ csvData }),
@@ -199,7 +199,7 @@ const AnalyzeComponent = ({
     } else {
       // For Wellness Enthusiasts: Send text data
       const requestData = { feeling, challenge, improve };
-      fetch("/api/predict", {
+      fetch("http://localhost:3000/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
