@@ -8,10 +8,10 @@ export const ShinyButtonDemo: React.FC = () => {
   const handleButtonClick = () => {
     setIsDialogOpen(true);
   };
-
   return (
     <div>
       <ShinyButton onClick={handleButtonClick}>Click Me to Explore</ShinyButton>
+      
       {isDialogOpen && <LoginDialog onClose={() => setIsDialogOpen(false)} />}
     </div>
   );

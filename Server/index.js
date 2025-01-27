@@ -14,7 +14,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use(cors({ origin: process.env.FRONTEND_URL })); // Replace with your frontend origin
+app.use(cors()); // Replace with your frontend origin
 
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
