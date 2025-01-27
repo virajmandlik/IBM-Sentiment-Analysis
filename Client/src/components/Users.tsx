@@ -105,7 +105,7 @@ const AnalyzeComponent = ({
           const formData = new FormData();
           formData.append("audio", file);
 
-          fetch("https://ibm-sentiment-analysis-back.vercel.app/transcribe", {
+          fetch("/transcribe", {
             method: "POST",
             body: formData,
           })
@@ -168,7 +168,7 @@ const AnalyzeComponent = ({
         complete: (result) => {
           const csvData = result.data;
 
-          fetch("https://ibm-sentiment-analysis-back.vercel.app/api/predictPatientsSentiments", {
+          fetch("/api/predictPatientsSentiments", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ csvData }),
@@ -199,7 +199,7 @@ const AnalyzeComponent = ({
     } else {
       // For Wellness Enthusiasts: Send text data
       const requestData = { feeling, challenge, improve };
-      fetch("https://ibm-sentiment-analysis-back.vercel.app/api/predict", {
+      fetch("/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
