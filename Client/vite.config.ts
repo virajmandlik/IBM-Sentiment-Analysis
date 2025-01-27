@@ -8,6 +8,7 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Ensure the build output is in the "dist" directory
   },
+  base:"/",
   plugins: [react()],
   resolve: {
     alias: {
