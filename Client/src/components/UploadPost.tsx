@@ -38,7 +38,7 @@ const Iphone15ProDemo: React.FC = () => {
     }
 
     try {
-      const response = await fetch("https://ibm-sentiment-analysis-back.vercel.app/api/instagram/post", {
+      const response = await fetch("http://localhost:3000/api/instagram/post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password, imageUrl, caption }),
@@ -62,7 +62,7 @@ const Iphone15ProDemo: React.FC = () => {
     }
 
     try {
-      const response = await fetch("https://ibm-sentiment-analysis-back.vercel.app/api/predict", {
+      const response = await fetch("http://localhost:3000/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ checkCaption: caption }),
