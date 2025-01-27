@@ -22,6 +22,16 @@ app.use(
   })
 );
 
+// Serve the "dist" folder as static files
+const distPath = path.join(__dirname, "./dist");
+app.use(express.static(distPath));
+
+// Fallback for React Router
+app.get("*", (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
+});
+
+
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
 const INSTANCE_URL = process.env.IBM_WATSON_URL;
