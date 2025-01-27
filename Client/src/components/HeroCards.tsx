@@ -100,7 +100,7 @@ export const HeroCards = () => {
         </Card>
 
         {/* Pricing */}
-        <Card className="absolute top-[170px] left-[50px] w-72 drop-shadow-xl shadow-black/10 dark:shadow-white/10 ">
+        <Card className="absolute top-[215px] left-[50px] w-72 drop-shadow-xl shadow-black/10 dark:shadow-white/10 ">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Free
@@ -136,7 +136,7 @@ export const HeroCards = () => {
         </Card>
 
         {/* Service */}
-        <Card className="absolute w-[350px] -right-[10px] bottom-[35px] top-[270px] drop-shadow-xl shadow-black/10 dark:shadow-white/10">
+        <Card className="absolute w-[330px] -right-[1px] -left-[100px]bottom-[35px] top-[270px] drop-shadow-xl shadow-black/10 dark:shadow-white/10">
           <CardHeader className="space-y-1 flex md:flex-row justify-start items-start gap-4">
             <div className="mt-1 bg-primary/20 p-1 rounded-2xl">
               <LightBulbIcon />
