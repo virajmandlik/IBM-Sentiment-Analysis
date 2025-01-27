@@ -14,12 +14,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors());
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
 const INSTANCE_URL = process.env.IBM_WATSON_URL;
-// Semntiment 
+// Semntiment
 const SENTI_API_KEY = process.env.IBM_API_KEY;
 const SENTI_INSTANCE_URL = process.env.IBM_URL;
 
@@ -31,74 +30,80 @@ if (!API_KEY || !INSTANCE_URL) {
   throw new Error("IBM API key or URL is not set in the environment variables");
 }
 
-// Serve static files from the "dist" directory
-// app.use(express.static(path.join(__dirname, "./dist")));
-
-// Fallback route to serve index.html for React SPA
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "./dist", "index.html"));
-// });
-
-
-
-// IBM Watson NLU initialization using Axios
+// Function to analyze sentiment
 const analyzeSentiment = async (text) => {
+  const requestData = {
+    text,
+    features: {
+      sentiment: {
+        document: true, // Perform document-level sentiment analysis
+      },
+    },
+  };
+
   try {
     const response = await axios.post(
-      `${SENTI_INSTANCE_URL}/v1/analyze?version=2019-07-12`,
-      {
-        text,
-        features: {
-          sentiment: { document: true },
-        },
-      },
+      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
+      requestData,
       {
         headers: { "Content-Type": "application/json" },
-        auth: { username: "apikey", password: SENTI_API_KEY },
+        auth: {
+          username: "apikey",
+          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
+        },
       }
     );
-    console.log('the frontend anayze sentiment is ',response.data.sentiment.document.label)
     return response.data.sentiment.document.label;
   } catch (error) {
-    console.log('the error in senutment alaysis is ',error)
-    console.error("Error in Watson Sentiment Analysis:", error.message);
-    throw error;
+    console.error("Error in Sentiment Analysis:", error.message);
+    throw error.response ? error.response.data : error.message;
   }
 };
 
 // Function to analyze emotions
 const analyzeEmotions = async (text) => {
+  const requestData = {
+    text,
+    features: {
+      emotion: {
+        document: true, // Perform document-level emotion analysis
+      },
+    },
+  };
+
   try {
     const response = await axios.post(
-      `${EMOT_INSTANCE_URL}/v1/analyze?version=2019-07-12`,
-      {
-        text,
-        features: {
-          emotion: { document: true },
-        },
-      },
+      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
+      requestData,
       {
         headers: { "Content-Type": "application/json" },
-        auth: { username: "apikey", password: EMOT_API_KEY },
+        auth: {
+          username: "apikey",
+          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
+        },
       }
     );
-    console.log('the message is in emotions i s',response.data.emotion.document.emotion)
     return response.data.emotion.document.emotion;
   } catch (error) {
-    console.error("Error in Watson Emotion Analysis:", error.message);
-    throw error;
+    console.error("Error in Emotion Analysis:", error.message);
+    throw error.response ? error.response.data : error.message;
   }
 };
 
 // Instagram functions (mock or real implementation)
-const { loginToInstagram, postToInstagram } = require("./src/instagram/index.js");
+const {
+  loginToInstagram,
+  postToInstagram,
+} = require("./src/instagram/index.js");
 
 // Instagram login endpoint
 app.post("/api/instagram/login", async (req, res) => {
   const { username, password } = req.body;
   // console.log("the usernamse an dpasss i s",username,password)
   if (!username || !password) {
-    return res.status(400).json({ error: "Username and password are required." });
+    return res
+      .status(400)
+      .json({ error: "Username and password are required." });
   }
 
   const result = await loginToInstagram(username, password);
@@ -118,25 +123,35 @@ const cronInsta = new CronJob("0 0 * * *", async () => {
 
 cronInsta.start();
 
-// Instagram post endpoint
-app.post("/api/instagram/post", async (req, res) => {
-  const { username, password, imageUrl, caption } = req.body;
-  console.log("Data received for Instagram post:", { username, password, imageUrl, caption });
+// Endpoint to perform sentiment and emotion analysis
+app.post("/api/analyze", async (req, res) => {
+  const { feeling, challenge, improve, checkCaption } = req.body;
 
-  if (!username || !password || !imageUrl || !caption) {
-    return res.status(400).json({ error: "All fields are required." });
+  // Validate the input
+  if (!feeling && !challenge && !improve && !checkCaption) {
+    return res
+      .status(400)
+      .json({ error: "Input text is required for analysis." });
   }
 
+  const combinedStatement =
+    checkCaption || `${feeling}. ${challenge}. ${improve}`;
+
   try {
-    const result = await postToInstagram(username, password, imageUrl, caption);
-    if (result.success) {
-      res.json({ message: "Post uploaded successfully!" });
-    } else {
-      res.status(500).json({ error: "Failed to upload post." });
-    }
+    const sentiment = await analyzeSentiment(combinedStatement);
+    const emotions = await analyzeEmotions(combinedStatement);
+
+    res.status(200).json({
+      combinedStatement,
+      sentiment,
+      emotions,
+    });
   } catch (error) {
-    console.error("Error uploading post:", error.message);
-    res.status(500).json({ error: "An error occurred while uploading the post." });
+    console.error("Error in Analysis:", error);
+    res.status(500).json({
+      error: "Failed to process analysis.",
+      details: error,
+    });
   }
 });
 
@@ -145,7 +160,8 @@ app.post("/api/predict", async (req, res) => {
   const { feeling, challenge, improve, checkCaption } = req.body;
 
   try {
-    const combinedStatement = checkCaption || `${feeling}. ${challenge}. ${improve}`;
+    const combinedStatement =
+      checkCaption || `${feeling}. ${challenge}. ${improve}`;
 
     // Perform Watson analysis
     const sentiment = await analyzeSentiment(combinedStatement);
