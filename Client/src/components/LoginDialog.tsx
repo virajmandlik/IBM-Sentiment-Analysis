@@ -29,7 +29,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = () => {
     setLoginFeedback(null);
     try {
       
-      const response = await fetch("http://localhost:3000/api/instagram/login", {
+      const response = await fetch("https://ibm-sentiment-analysis-back.vercel.app/api/instagram/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
