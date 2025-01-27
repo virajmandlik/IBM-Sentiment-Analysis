@@ -14,7 +14,14 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://ibm-sentiment-analysis-fr.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
 const INSTANCE_URL = process.env.IBM_WATSON_URL;
