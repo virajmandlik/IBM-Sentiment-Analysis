@@ -14,7 +14,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use(cors()); // Replace with your frontend origin
+app.use(cors({
+  origin: "*", // Use '*' to allow all, but be cautious with sensitive data
+  credentials: false, // Set to true if you need cookies or Authorization headers
+}));
 
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
