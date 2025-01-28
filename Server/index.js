@@ -22,8 +22,9 @@ app.use(
   })
 );
 
+
 // Serve the "dist" folder as static files
-const distPath = path.join(__dirname, "./dist");
+const distPath = path.join(__dirname, "dist");
 app.use(express.static(distPath));
 
 // Fallback for React Router
