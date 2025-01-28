@@ -54,39 +54,32 @@ const Iphone15ProDemo: React.FC = () => {
       setUploadFeedback("Something went wrong. Please try again.");
     }
   };
-// Update the handleCheckSentiment function with better error handling
-const handleCheckSentiment = async () => {
-  if (!caption) {
-    setSentimentFeedback("Please enter a caption to check sentiment.");
-    return;
-  }
 
-  try {
-    setSentimentFeedback("Analyzing...");
-    const response = await fetch("http://localhost:3000/api/predict", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ checkCaption: caption }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Analysis failed");
+  const handleCheckSentiment = async () => {
+    if (!caption) {
+      setSentimentFeedback("Please enter a caption to check sentiment.");
+      return;
     }
 
-    setSentiment(data.sentiment);
-    setEmotionData(data.emotions);
-    setSentimentFeedback("Analysis successful!");
-    
-    console.log("Emotion Results:", data.emotions);
-  } catch (error: any) {
-    console.error("Analysis Error:", error);
-    setSentimentFeedback(error.message || "Analysis service unavailable");
-    setSentiment(null);
-    setEmotionData(null);
-  }
-};
-  
+    try {
+      const response = await fetch("http://localhost:3000/api/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkCaption: caption }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setSentiment(data.sentiment);
+        setEmotionData(data.emotions); // Store emotion data in the state
+        setSentimentFeedback("Sentiment analysis successful!");
+      } else {
+        setSentimentFeedback("Failed to analyze sentiment.");
+      }
+    } catch (error) {
+      setSentimentFeedback("Something went wrong. Please try again.");
+    }
+  };
 
   const getSentimentColor = (sentiment: string | null) => {
     switch (sentiment) {
@@ -102,19 +95,14 @@ const handleCheckSentiment = async () => {
   };
 
   const isPostButtonDisabled = () => {
-    if (!emotionData) return true;
-  
-    const emotionThresholds = {
-      sadness: 0.2,
-      fear: 0.2,
-      disgust: 0.2,
-      anger: 0.2
-    };
-  
-    const hasNegativeEmotion = Object.entries(emotionThresholds)
-      .some(([emotion, threshold]) => emotionData[emotion] > threshold);
-  
-    return hasNegativeEmotion || !caption || !imageUrl;
+    // Button should be disabled if any emotion exceeds the threshold
+    const isEmotionValid =
+      (emotionData?.sadness && emotionData.sadness <= 0.2) &&
+      (emotionData?.fear && emotionData.fear <= 0.2) &&
+      (emotionData?.disgust && emotionData.disgust <= 0.2) &&
+      (emotionData?.anger && emotionData.anger <= 0.2);
+
+    return !isEmotionValid || !caption || !imageUrl;
   };
 
   return (
