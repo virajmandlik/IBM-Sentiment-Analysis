@@ -105,7 +105,7 @@ const AnalyzeComponent = ({
           const formData = new FormData();
           formData.append("audio", file);
 
-          fetch("/transcribe", {
+          fetch("http://localhost:3000/transcribe", {
             method: "POST",
             body: formData,
           })
@@ -153,9 +153,11 @@ const AnalyzeComponent = ({
   const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('Selected CSV file:', file); // Log the selected file
       setCsvFile(file);
     }
   };
+
 
   const handleSubmit = () => {
     setLoading(true);
@@ -168,7 +170,7 @@ const AnalyzeComponent = ({
         complete: (result) => {
           const csvData = result.data;
 
-          fetch("/api/predictPatientsSentiments", {
+          fetch("http://localhost:3000/api/predictPatientsSentiments", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ csvData }),
@@ -199,14 +201,14 @@ const AnalyzeComponent = ({
     } else {
       // For Wellness Enthusiasts: Send text data
       const requestData = { feeling, challenge, improve };
-      fetch("/api/predict", {
+      fetch("http://localhost:3000/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       })
         .then((response) => {
           if (!response.ok) {
-            throw new globalThis.Error(`HTTP error! status: ${response.status}`); // Updated
+            throw new globalThis.Error( `HTTP error! status: ${response.status} `); // Updated
           }
           return response.json();
         })
@@ -222,6 +224,10 @@ const AnalyzeComponent = ({
         });
     }
   };
+
+  
+  
+  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
