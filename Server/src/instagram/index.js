@@ -26,6 +26,7 @@ const loginToInstagram = async (username, password) => {
 
 const postToInstagram = async (username, password, imageUrl, caption) => {
     try {
+      console.log("the image url is", imageUrl,caption,password,username);
       const ig = new IgApiClient();
       ig.state.generateDevice(username);
       await ig.account.login(username, password);

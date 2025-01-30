@@ -47,6 +47,19 @@ const AvatarDemo = ({ avatarUrl }: { avatarUrl: string }) => (
   </Avatar>
 );
 
+const handleDownloadTemplate = () => {
+  const csvContent = "Name,Age,Sentiment,Type,Country,City,State,Gender\n";
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "counselor_template.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
+
 const AnalyzeComponent = ({
   user,
   onClose,
@@ -259,6 +272,11 @@ const AnalyzeComponent = ({
                 onChange={handleCSVUpload}
                 accept=".csv"
               />
+
+               {/* ADD A DOWNLOAD TEMPLATE BUTTON */}
+    <Button variant="outline" className="mt-2" onClick={handleDownloadTemplate}>
+      Download CSV Template
+    </Button>
             </div>
           ) : (
             <form className="space-y-4">

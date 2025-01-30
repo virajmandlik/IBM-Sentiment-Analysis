@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-
+import { Progress } from "@/components/ui/progress";
 
 interface LoginDialogProps {
   onClose: () => void;
@@ -21,40 +21,48 @@ export const LoginDialog: React.FC<LoginDialogProps> = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginFeedback, setLoginFeedback] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(true); // State to control dialog visibility
+  const [isOpen, setIsOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     setLoginFeedback(null);
+    setIsLoading(true);
+    setProgress(10);
+
     try {
-      
-      const response = await fetch("/api/instagram/login", {
+      const response = await fetch("https://ibm-sentiment-analysis-3gdr.onrender.com/api/instagram/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
+      setProgress(50);
       const data = await response.json();
-      console.log("Response Status:", response.status);
-      console.log("Response Data:", data);
+      setProgress(80);
 
       if (response.ok) {
         setLoginFeedback("Login successful!");
-        // Navigate to the UploadPost page and pass the credentials as state
-        navigate("/upload", { state: { username, password } });
+        setProgress(100);
+        setTimeout(() => {
+          navigate("/upload", { state: { username, password } });
+        }, 500);
       } else {
         setLoginFeedback(data.error || "Invalid login credentials.");
+        setIsLoading(false);
       }
     } catch (error) {
       setLoginFeedback("Something went wrong. Please try again.");
-      console.error("Login error:", error);
+      setIsLoading(false);
+    } finally {
+      setTimeout(() => setIsLoading(false), 1000);
     }
   };
 
   const handleClose = () => {
-    // Close the dialog and scroll to the features section
-    setIsOpen(false); // Hide the dialog
+    setIsOpen(false);
     const featuresSection = document.getElementById("features");
     if (featuresSection) {
       featuresSection.scrollIntoView({ behavior: "smooth" });
@@ -95,6 +103,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = () => {
             />
           </div>
         </div>
+        {isLoading && <Progress value={progress} className="w-full h-2 bg-gray-200" />}
         {loginFeedback && (
           <p
             className={`text-center text-sm ${
@@ -105,10 +114,9 @@ export const LoginDialog: React.FC<LoginDialogProps> = () => {
           </p>
         )}
         <DialogFooter>
-          <Button type="submit" onClick={handleLogin}>
-            Login
+          <Button type="submit" onClick={handleLogin} disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
           </Button>
-          {/* Close button added */}
           <Button type="button" onClick={handleClose} className="ml-4">
             Close
           </Button>
