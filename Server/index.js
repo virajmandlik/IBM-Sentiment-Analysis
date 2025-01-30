@@ -7,6 +7,12 @@ const fs = require("fs");
 const CronJob = require("cron").CronJob;
 const dotenv = require("dotenv");
 const path = require("path");
+const { saveAnalysisToDb, savePatientSentiment } = require("./dbUtils");
+const upload1 = multer({
+  dest: path.join(__dirname, "tmp"), // Specify the uploads directory
+});
+const Papa = require("papaparse"); // To parse CSV
+const serverless = require("serverless-http");
 // Load environment variables
 dotenv.config();
 
@@ -16,22 +22,20 @@ app.use(bodyParser.json());
 
 // app.use(
 //   cors({
-//     origin: "https://ibm-sentiment-analysis-fr.vercel.app",
+//     origin: "http://localhost:5173",
 //     methods: ["GET", "POST", "PUT", "DELETE"],
 //     credentials: true,
 //   })
 // );
 
-
 // Serve the "dist" folder as static files
-const distPath = path.join(__dirname, "dist");
-app.use(express.static(distPath));
+// const distPath = path.join(__dirname, "dist");
+// app.use(express.static(distPath));
 
 // Fallback for React Router
-app.get("*", (req, res) => {
-  res.sendFile(path.join(distPath, "index.html"));
-});
-
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(distPath, "index.html"));
+// });
 
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
@@ -50,6 +54,7 @@ if (!API_KEY || !INSTANCE_URL) {
 
 // Function to analyze sentiment
 const analyzeSentiment = async (text) => {
+  console.log('the text recieved by senitment is ',text)
   const requestData = {
     text,
     features: {
@@ -61,18 +66,20 @@ const analyzeSentiment = async (text) => {
 
   try {
     const response = await axios.post(
-      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
+      SENTI_INSTANCE_URL,
       requestData,
       {
         headers: { "Content-Type": "application/json" },
         auth: {
           username: "apikey",
-          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
+          password: SENTI_API_KEY,
         },
       }
     );
+    console.log('the senitment response is : ',response)
     return response.data.sentiment.document.label;
   } catch (error) {
+    console.log('the errror in senitment is ',error)
     console.error("Error in Sentiment Analysis:", error.message);
     throw error.response ? error.response.data : error.message;
   }
@@ -91,13 +98,13 @@ const analyzeEmotions = async (text) => {
 
   try {
     const response = await axios.post(
-      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
+      EMOT_INSTANCE_URL,
       requestData,
       {
         headers: { "Content-Type": "application/json" },
         auth: {
           username: "apikey",
-          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
+          password: EMOT_API_KEY,
         },
       }
     );
@@ -140,7 +147,34 @@ const cronInsta = new CronJob("0 0 * * *", async () => {
 });
 
 cronInsta.start();
+// Instagram post endpoint
+app.post("/api/instagram/post", async (req, res) => {
+  const { username, password, imageUrl, caption } = req.body;
+  console.log("Data received for Instagram post:", {
+    username,
+    password,
+    imageUrl,
+    caption,
+  });
 
+  if (!username || !password || !imageUrl || !caption) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+
+  try {
+    const result = await postToInstagram(username, password, imageUrl, caption);
+    if (result.success) {
+      res.json({ message: "Post uploaded successfully!" });
+    } else {
+      res.status(500).json({ error: "Failed to upload post." });
+    }
+  } catch (error) {
+    console.error("Error uploading post:", error.message);
+    res
+      .status(500)
+      .json({ error: "An error occurred while uploading the post." });
+  }
+});
 // Endpoint to perform sentiment and emotion analysis
 app.post("/api/analyze", async (req, res) => {
   const { feeling, challenge, improve, checkCaption } = req.body;
@@ -158,7 +192,8 @@ app.post("/api/analyze", async (req, res) => {
   try {
     const sentiment = await analyzeSentiment(combinedStatement);
     const emotions = await analyzeEmotions(combinedStatement);
-
+    // Save analysis result to Db2
+    await saveAnalysisToDb(combinedStatement, sentiment, emotions);
     res.status(200).json({
       combinedStatement,
       sentiment,
@@ -176,15 +211,18 @@ app.post("/api/analyze", async (req, res) => {
 // Predict sentiment and emotions
 app.post("/api/predict", async (req, res) => {
   const { feeling, challenge, improve, checkCaption } = req.body;
-
+  console.log('the caption recieved is',checkCaption);
   try {
     const combinedStatement =
       checkCaption || `${feeling}. ${challenge}. ${improve}`;
 
     // Perform Watson analysis
     const sentiment = await analyzeSentiment(combinedStatement);
-    const emotions = await analyzeEmotions(combinedStatement);
-
+    console.log('the result of senutment is ',sentiment);
+    const emotions = await analyzeEmotions(combinedStatement);    
+    console.log('the result of emotions is ',emotions);
+    // Save analysis result to Db2
+    await saveAnalysisToDb(combinedStatement, sentiment, emotions);
     res.json({ combinedStatement, sentiment, emotions });
   } catch (error) {
     console.error("Error in analysis:", error.message);
@@ -193,6 +231,36 @@ app.post("/api/predict", async (req, res) => {
 });
 
 // Predict sentiments for CSV data
+// app.post("/api/predictPatientsSentiments", async (req, res) => {
+//   const csvData = req.body.csvData;
+
+//   if (!csvData || csvData.length === 0) {
+//     return res.status(400).json({ error: "CSV data is empty or missing." });
+//   }
+
+//   const results = [];
+
+//   for (const row of csvData) {
+//     const { Name: name, Sentiment: sentimentInput } = row;
+
+//     try {
+//       const sentiment = await analyzeSentiment(sentimentInput);
+//       const emotions = await analyzeEmotions(sentimentInput);
+
+//       results.push({ name, sentiment, emotions });
+//     } catch (error) {
+//       console.error(`Error processing row for ${name}:`, error.message);
+//       results.push({
+//         name,
+//         sentiment: "Error processing sentiment",
+//         emotions: null,
+//       });
+//     }
+//   }
+
+//   res.json(results);
+// });
+
 app.post("/api/predictPatientsSentiments", async (req, res) => {
   const csvData = req.body.csvData;
 
@@ -203,28 +271,70 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
   const results = [];
 
   for (const row of csvData) {
-    const { Name: name, Sentiment: sentimentInput } = row;
+    const {
+      Name: name,
+      Age: age,
+      Sentiment: sentimentInput,
+      Type: type,
+      Country: country,
+      City: city,
+      State: state,
+      Gender: gender,
+    } = row;
 
     try {
       const sentiment = await analyzeSentiment(sentimentInput);
       const emotions = await analyzeEmotions(sentimentInput);
+      // Store the data in the database
+      await savePatientSentiment(
+        name,
+        age,
+        sentiment,
+        emotions,
+        type,
+        country,
+        city,
+        state,
+        gender
+      );
 
-      results.push({ name, sentiment, emotions });
+      results.push({
+        name,
+        age,
+        sentiment,
+        emotions,
+        type,
+        country,
+        city,
+        state,
+        gender,
+      });
     } catch (error) {
       console.error(`Error processing row for ${name}:`, error.message);
       results.push({
         name,
+        age,
         sentiment: "Error processing sentiment",
         emotions: null,
+        type,
+        country,
+        city,
+        state,
+        gender,
       });
     }
   }
 
+  // Log the results before sending the response
+  console.log("Processed Results:", results);
+  // If the file was uploaded, remove it from the upload folder
+
+  // Send the response to the frontend
   res.json(results);
 });
 
 // File upload handling (e.g., for audio transcription)
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "tmp/" });
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   const audioFile = req.file;
@@ -254,6 +364,8 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     });
   }
 });
+
+module.exports = serverless(app);
 
 app.listen(3000, () => {
   console.log("Node.js server is running on port 3000");
