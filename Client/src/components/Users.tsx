@@ -57,7 +57,7 @@ const AnalyzeComponent = ({
   onResults: (results: any) => void;
 }) => {
   const [isRecording, setIsRecording] = React.useState<boolean>(false);
-  const [,setTranscription] = React.useState<string | null>(null);
+  const [, setTranscription] = React.useState<string | null>(null);
   // const [ Error,setError] = React.useState<string | null>(null);
   const recorderRef = React.useRef<RecordRTC | null>(null);
 
@@ -105,7 +105,7 @@ const AnalyzeComponent = ({
           const formData = new FormData();
           formData.append("audio", file);
 
-          fetch("/transcribe", {
+          fetch("https://ibm-sentiment-analysis-3gdr.onrender.com/transcribe", {
             method: "POST",
             body: formData,
           })
@@ -116,7 +116,9 @@ const AnalyzeComponent = ({
               return response.json();
             })
             .then((data) => {
-              const transcript = data?.results?.[0]?.alternatives?.[0]?.transcript ?? "No transcription available";
+              const transcript =
+                data?.results?.[0]?.alternatives?.[0]?.transcript ??
+                "No transcription available";
 
               setTranscription(transcript); // Store the transcription in state
               console.log(transcript);
@@ -142,7 +144,6 @@ const AnalyzeComponent = ({
       setIsRecording(false);
     }
   };
-  
 
   const [feeling, setFeeling] = React.useState("");
   const [challenge, setChallenge] = React.useState("");
@@ -153,6 +154,7 @@ const AnalyzeComponent = ({
   const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log("Selected CSV file:", file); // Log the selected file
       setCsvFile(file);
     }
   };
@@ -168,15 +170,19 @@ const AnalyzeComponent = ({
         complete: (result) => {
           const csvData = result.data;
 
-          fetch("/api/predictPatientsSentiments", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ csvData }),
-          })
+          fetch(
+            "https://ibm-sentiment-analysis-3gdr.onrender.com/api/predictPatientsSentiments",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ csvData }),
+            }
+          )
             .then((response) => {
               if (!response.ok) {
-                throw new globalThis.Error(`HTTP error! status: ${response.status}`);
-
+                throw new globalThis.Error(
+                  `HTTP error! status: ${response.status}`
+                );
               }
               return response.json();
             })
@@ -199,14 +205,16 @@ const AnalyzeComponent = ({
     } else {
       // For Wellness Enthusiasts: Send text data
       const requestData = { feeling, challenge, improve };
-      fetch("/api/predict", {
+      fetch("https://ibm-sentiment-analysis-3gdr.onrender.com/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       })
         .then((response) => {
           if (!response.ok) {
-            throw new globalThis.Error(`HTTP error! status: ${response.status}`); // Updated
+            throw new globalThis.Error(
+              `HTTP error! status: ${response.status} `
+            ); // Updated
           }
           return response.json();
         })
