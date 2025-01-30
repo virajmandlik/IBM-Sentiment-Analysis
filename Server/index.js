@@ -7,8 +7,9 @@ const fs = require("fs");
 const CronJob = require("cron").CronJob;
 const dotenv = require("dotenv");
 const path = require("path");
-const upload1 = multer({ 
-  dest: path.join(__dirname, 'uploads') // Specify the uploads directory
+const { saveAnalysisToDb, savePatientSentiment } = require("./dbUtils");
+const upload1 = multer({
+  dest: path.join(__dirname, "uploads"), // Specify the uploads directory
 });
 const Papa = require("papaparse"); // To parse CSV
 
@@ -27,7 +28,6 @@ app.use(
   })
 );
 
-
 // Serve the "dist" folder as static files
 // const distPath = path.join(__dirname, "dist");
 // app.use(express.static(distPath));
@@ -36,7 +36,6 @@ app.use(
 // app.get("*", (req, res) => {
 //   res.sendFile(path.join(distPath, "index.html"));
 // });
-
 
 // Environment variables for IBM Watson API
 const API_KEY = process.env.IBM_WATSON_API_KEY;
@@ -148,7 +147,12 @@ cronInsta.start();
 // Instagram post endpoint
 app.post("/api/instagram/post", async (req, res) => {
   const { username, password, imageUrl, caption } = req.body;
-  console.log("Data received for Instagram post:", { username, password, imageUrl, caption });
+  console.log("Data received for Instagram post:", {
+    username,
+    password,
+    imageUrl,
+    caption,
+  });
 
   if (!username || !password || !imageUrl || !caption) {
     return res.status(400).json({ error: "All fields are required." });
@@ -163,7 +167,9 @@ app.post("/api/instagram/post", async (req, res) => {
     }
   } catch (error) {
     console.error("Error uploading post:", error.message);
-    res.status(500).json({ error: "An error occurred while uploading the post." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while uploading the post." });
   }
 });
 // Endpoint to perform sentiment and emotion analysis
@@ -183,7 +189,8 @@ app.post("/api/analyze", async (req, res) => {
   try {
     const sentiment = await analyzeSentiment(combinedStatement);
     const emotions = await analyzeEmotions(combinedStatement);
-
+    // Save analysis result to Db2
+    await saveAnalysisToDb(combinedStatement, sentiment, emotions);
     res.status(200).json({
       combinedStatement,
       sentiment,
@@ -209,7 +216,8 @@ app.post("/api/predict", async (req, res) => {
     // Perform Watson analysis
     const sentiment = await analyzeSentiment(combinedStatement);
     const emotions = await analyzeEmotions(combinedStatement);
-
+    // Save analysis result to Db2
+    await saveAnalysisToDb(combinedStatement, sentiment, emotions);
     res.json({ combinedStatement, sentiment, emotions });
   } catch (error) {
     console.error("Error in analysis:", error.message);
@@ -272,6 +280,18 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
     try {
       const sentiment = await analyzeSentiment(sentimentInput);
       const emotions = await analyzeEmotions(sentimentInput);
+      // Store the data in the database
+      await savePatientSentiment(
+        name,
+        age,
+        sentiment,
+        emotions,
+        type,
+        country,
+        city,
+        state,
+        gender
+      );
 
       results.push({
         name,
@@ -302,20 +322,11 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
 
   // Log the results before sending the response
   console.log("Processed Results:", results);
- // If the file was uploaded, remove it from the upload folder
- if (filePath) {
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      console.error("Error deleting the file:", err);
-    } else {
-      console.log("File deleted successfully:", filePath);
-    }
-  });
-}
+  // If the file was uploaded, remove it from the upload folder
+
   // Send the response to the frontend
   res.json(results);
 });
-
 
 // File upload handling (e.g., for audio transcription)
 const upload = multer({ dest: "uploads/" });
