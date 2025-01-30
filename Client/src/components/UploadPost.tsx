@@ -111,13 +111,7 @@ const Iphone15ProDemo: React.FC = () => {
   };
 
   const isPostButtonDisabled = () => {
-    const isEmotionValid =
-      (emotionData?.sadness && emotionData.sadness <= 0.2) &&
-      (emotionData?.fear && emotionData.fear <= 0.2) &&
-      (emotionData?.disgust && emotionData.disgust <= 0.2) &&
-      (emotionData?.anger && emotionData.anger <= 0.2);
-
-    return !isEmotionValid || !caption || !imageUrl || isLoadingPost;
+    return sentiment !== "positive" || !caption || !imageUrl || isLoadingPost;
   };
 
   const isValidUrl = (url: string) => {

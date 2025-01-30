@@ -4,10 +4,10 @@ import insta_pic from "../assets/insta-pic-removebg-preview.png";
 
 export const RetroGridBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="relative flex flex-col h-screen w-full items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl px-6 md:px-16">
+    <div className="relative flex flex-col min-h-screen w-full items-center justify-start overflow-y-auto rounded-lg border bg-background md:shadow-xl px-6 md:px-16">
       {/* Header Text */}
-      <div className="w-full flex justify-center mb-8 text-center my-10">
-        <p className="text-9xl md:text-2xl font-bold text-primary py-1 my-9  px-4 rounded-md shadow-lg">
+      <div className="w-full flex justify-center mb-8 text-center my-10 px-4">
+        <p className="text-3xl md:text-5xl font-bold text-primary py-1 my-9 px-4 rounded-md shadow-lg">
           This tool is like a cheat code for social media
         </p>
       </div>
