@@ -9,24 +9,24 @@ const dotenv = require("dotenv");
 const path = require("path");
 const { saveAnalysisToDb, savePatientSentiment } = require("./dbUtils");
 const upload1 = multer({
-  dest: path.join(__dirname, "tmp"), // Specify the uploads directory
+  dest: path.join(__dirname, "uploads"), // Specify the uploads directory
 });
 const Papa = require("papaparse"); // To parse CSV
-const serverless = require("serverless-http");
+
 // Load environment variables
 dotenv.config();
 
 const app = express();
-app.use(cors("*"));
+app.use(cors());
 app.use(bodyParser.json());
 
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 // Serve the "dist" folder as static files
 // const distPath = path.join(__dirname, "dist");
@@ -54,7 +54,6 @@ if (!API_KEY || !INSTANCE_URL) {
 
 // Function to analyze sentiment
 const analyzeSentiment = async (text) => {
-  console.log('the text recieved by senitment is ',text)
   const requestData = {
     text,
     features: {
@@ -66,20 +65,18 @@ const analyzeSentiment = async (text) => {
 
   try {
     const response = await axios.post(
-      SENTI_INSTANCE_URL,
+      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
       requestData,
       {
         headers: { "Content-Type": "application/json" },
         auth: {
           username: "apikey",
-          password: SENTI_API_KEY,
+          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
         },
       }
     );
-    console.log('the senitment response is : ',response)
     return response.data.sentiment.document.label;
   } catch (error) {
-    console.log('the errror in senitment is ',error)
     console.error("Error in Sentiment Analysis:", error.message);
     throw error.response ? error.response.data : error.message;
   }
@@ -98,13 +95,13 @@ const analyzeEmotions = async (text) => {
 
   try {
     const response = await axios.post(
-      EMOT_INSTANCE_URL,
+      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
       requestData,
       {
         headers: { "Content-Type": "application/json" },
         auth: {
           username: "apikey",
-          password: EMOT_API_KEY,
+          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
         },
       }
     );
@@ -211,16 +208,14 @@ app.post("/api/analyze", async (req, res) => {
 // Predict sentiment and emotions
 app.post("/api/predict", async (req, res) => {
   const { feeling, challenge, improve, checkCaption } = req.body;
-  console.log('the caption recieved is',checkCaption);
+
   try {
     const combinedStatement =
       checkCaption || `${feeling}. ${challenge}. ${improve}`;
 
     // Perform Watson analysis
     const sentiment = await analyzeSentiment(combinedStatement);
-    console.log('the result of senutment is ',sentiment);
-    const emotions = await analyzeEmotions(combinedStatement);    
-    console.log('the result of emotions is ',emotions);
+    const emotions = await analyzeEmotions(combinedStatement);
     // Save analysis result to Db2
     await saveAnalysisToDb(combinedStatement, sentiment, emotions);
     res.json({ combinedStatement, sentiment, emotions });
@@ -334,7 +329,7 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
 });
 
 // File upload handling (e.g., for audio transcription)
-const upload = multer({ dest: "tmp/" });
+const upload = multer({ dest: "uploads/" });
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   const audioFile = req.file;
@@ -364,8 +359,6 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     });
   }
 });
-
-module.exports = serverless(app);
 
 app.listen(3000, () => {
   console.log("Node.js server is running on port 3000");
