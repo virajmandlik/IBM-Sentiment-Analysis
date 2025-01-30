@@ -7,11 +7,6 @@ const fs = require("fs");
 const CronJob = require("cron").CronJob;
 const dotenv = require("dotenv");
 const path = require("path");
-const upload1 = multer({ 
-  dest: path.join(__dirname, 'uploads') // Specify the uploads directory
-});
-const Papa = require("papaparse"); // To parse CSV
-
 // Load environment variables
 dotenv.config();
 
@@ -21,7 +16,7 @@ app.use(bodyParser.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://ibm-sentiment-analysis-fr.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -29,13 +24,13 @@ app.use(
 
 
 // Serve the "dist" folder as static files
-// const distPath = path.join(__dirname, "dist");
-// app.use(express.static(distPath));
+const distPath = path.join(__dirname, "dist");
+app.use(express.static(distPath));
 
 // Fallback for React Router
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(distPath, "index.html"));
-// });
+app.get("*", (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
+});
 
 
 // Environment variables for IBM Watson API
@@ -145,27 +140,7 @@ const cronInsta = new CronJob("0 0 * * *", async () => {
 });
 
 cronInsta.start();
-// Instagram post endpoint
-app.post("/api/instagram/post", async (req, res) => {
-  const { username, password, imageUrl, caption } = req.body;
-  console.log("Data received for Instagram post:", { username, password, imageUrl, caption });
 
-  if (!username || !password || !imageUrl || !caption) {
-    return res.status(400).json({ error: "All fields are required." });
-  }
-
-  try {
-    const result = await postToInstagram(username, password, imageUrl, caption);
-    if (result.success) {
-      res.json({ message: "Post uploaded successfully!" });
-    } else {
-      res.status(500).json({ error: "Failed to upload post." });
-    }
-  } catch (error) {
-    console.error("Error uploading post:", error.message);
-    res.status(500).json({ error: "An error occurred while uploading the post." });
-  }
-});
 // Endpoint to perform sentiment and emotion analysis
 app.post("/api/analyze", async (req, res) => {
   const { feeling, challenge, improve, checkCaption } = req.body;
@@ -218,36 +193,6 @@ app.post("/api/predict", async (req, res) => {
 });
 
 // Predict sentiments for CSV data
-// app.post("/api/predictPatientsSentiments", async (req, res) => {
-//   const csvData = req.body.csvData;
-
-//   if (!csvData || csvData.length === 0) {
-//     return res.status(400).json({ error: "CSV data is empty or missing." });
-//   }
-
-//   const results = [];
-
-//   for (const row of csvData) {
-//     const { Name: name, Sentiment: sentimentInput } = row;
-
-//     try {
-//       const sentiment = await analyzeSentiment(sentimentInput);
-//       const emotions = await analyzeEmotions(sentimentInput);
-
-//       results.push({ name, sentiment, emotions });
-//     } catch (error) {
-//       console.error(`Error processing row for ${name}:`, error.message);
-//       results.push({
-//         name,
-//         sentiment: "Error processing sentiment",
-//         emotions: null,
-//       });
-//     }
-//   }
-
-//   res.json(results);
-// });
-
 app.post("/api/predictPatientsSentiments", async (req, res) => {
   const csvData = req.body.csvData;
 
@@ -258,64 +203,25 @@ app.post("/api/predictPatientsSentiments", async (req, res) => {
   const results = [];
 
   for (const row of csvData) {
-    const {
-      Name: name,
-      Age: age,
-      Sentiment: sentimentInput,
-      Type: type,
-      Country: country,
-      City: city,
-      State: state,
-      Gender: gender,
-    } = row;
+    const { Name: name, Sentiment: sentimentInput } = row;
 
     try {
       const sentiment = await analyzeSentiment(sentimentInput);
       const emotions = await analyzeEmotions(sentimentInput);
 
-      results.push({
-        name,
-        age,
-        sentiment,
-        emotions,
-        type,
-        country,
-        city,
-        state,
-        gender,
-      });
+      results.push({ name, sentiment, emotions });
     } catch (error) {
       console.error(`Error processing row for ${name}:`, error.message);
       results.push({
         name,
-        age,
         sentiment: "Error processing sentiment",
         emotions: null,
-        type,
-        country,
-        city,
-        state,
-        gender,
       });
     }
   }
 
-  // Log the results before sending the response
-  console.log("Processed Results:", results);
- // If the file was uploaded, remove it from the upload folder
- if (filePath) {
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      console.error("Error deleting the file:", err);
-    } else {
-      console.log("File deleted successfully:", filePath);
-    }
-  });
-}
-  // Send the response to the frontend
   res.json(results);
 });
-
 
 // File upload handling (e.g., for audio transcription)
 const upload = multer({ dest: "uploads/" });
