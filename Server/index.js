@@ -65,13 +65,13 @@ const analyzeSentiment = async (text) => {
 
   try {
     const response = await axios.post(
-      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
+      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/17167ade-619c-4059-a0f5-f299db2b3e2a/v1/analyze?version=2019-07-12",
       requestData,
       {
         headers: { "Content-Type": "application/json" },
         auth: {
           username: "apikey",
-          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
+          password: "LYkPmglN9JrB8AWiTF5jtT6ioY8o_9entyaiUlTI_Gen",
         },
       }
     );
@@ -95,13 +95,13 @@ const analyzeEmotions = async (text) => {
 
   try {
     const response = await axios.post(
-      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9e7dfe1f-21dc-4e2f-9b46-b6ae1c28eeba/v1/analyze?version=2019-07-12",
+      "https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/17167ade-619c-4059-a0f5-f299db2b3e2a/v1/analyze?version=2019-07-12",
       requestData,
       {
         headers: { "Content-Type": "application/json" },
         auth: {
           username: "apikey",
-          password: "uP4e-fGqlzwecrNpA0S3J1dTkt2nl7_gO1z5vfQ6DX3-",
+          password: "LYkPmglN9JrB8AWiTF5jtT6ioY8o_9entyaiUlTI_Gen",
         },
       }
     );
