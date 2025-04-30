@@ -190,7 +190,7 @@ app.post("/api/analyze", async (req, res) => {
     const sentiment = await analyzeSentiment(combinedStatement);
     const emotions = await analyzeEmotions(combinedStatement);
     // Save analysis result to Db2
-    await saveAnalysisToDb(combinedStatement, sentiment, emotions);
+    //await saveAnalysisToDb(combinedStatement, sentiment, emotions);
     res.status(200).json({
       combinedStatement,
       sentiment,
@@ -217,7 +217,7 @@ app.post("/api/predict", async (req, res) => {
     const sentiment = await analyzeSentiment(combinedStatement);
     const emotions = await analyzeEmotions(combinedStatement);
     // Save analysis result to Db2
-    await saveAnalysisToDb(combinedStatement, sentiment, emotions);
+    //await saveAnalysisToDb(combinedStatement, sentiment, emotions);
     res.json({ combinedStatement, sentiment, emotions });
   } catch (error) {
     console.error("Error in analysis:", error.message);
