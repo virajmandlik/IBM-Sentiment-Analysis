@@ -1,0 +1,38 @@
+name: Build and Deploy React App (Client Only)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Navigate to Client and install dependencies
+        run: |
+          cd Client
+          npm install
+
+      - name: Build Client project
+        run: |
+          cd Client
+          npm run build
+
+      - name: Deploy to Hostinger FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./Client/dist/
+          server-dir: /sentify/
